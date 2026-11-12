@@ -1,0 +1,419 @@
+[
+  {
+    "id": 1,
+    "question": "How do I make a query parameter optional?",
+    "reference_answer": "Give the parameter a default value of None, e.g. q: str | None = None.",
+    "gold_sources": [
+      "tutorial/query-params.md"
+    ],
+    "answerable": true
+  },
+  {
+    "id": 2,
+    "question": "If a route has skip=0 and limit=10 as defaults and I request /items/?skip=20, what values does my function get?",
+    "reference_answer": "skip=20 (from the URL) and limit=10 (the default).",
+    "gold_sources": [
+      "tutorial/query-params.md"
+    ],
+    "answerable": true
+  },
+  {
+    "id": 3,
+    "question": "What exactly is the query part of a URL?",
+    "reference_answer": "The set of key-value pairs after the ? in a URL, separated by & characters.",
+    "gold_sources": [
+      "tutorial/query-params.md"
+    ],
+    "answerable": true
+  },
+  {
+    "id": 4,
+    "question": "What response do I get if a path parameter declared as int receives the value foo?",
+    "reference_answer": "An HTTP error with a JSON detail saying the input should be a valid integer (type int_parsing), pointing to path > item_id.",
+    "gold_sources": [
+      "tutorial/path-params.md"
+    ],
+    "answerable": true
+  },
+  {
+    "id": 5,
+    "question": "How do I declare the type of a path parameter?",
+    "reference_answer": "Use standard Python type annotations on the function parameter, e.g. item_id: int.",
+    "gold_sources": [
+      "tutorial/path-params.md"
+    ],
+    "answerable": true
+  },
+  {
+    "id": 6,
+    "question": "How do I declare the JSON body that a client sends to my endpoint?",
+    "reference_answer": "Create a Pydantic model that inherits from BaseModel and declare it as the type of a path operation function parameter.",
+    "gold_sources": [
+      "tutorial/body.md"
+    ],
+    "answerable": true
+  },
+  {
+    "id": 7,
+    "question": "Can a GET request carry a request body in FastAPI?",
+    "reference_answer": "It is supported only for extreme cases but discouraged: behavior is undefined in the specs, Swagger UI will not document the body and proxies may not support it.",
+    "gold_sources": [
+      "tutorial/body.md"
+    ],
+    "answerable": true
+  },
+  {
+    "id": 8,
+    "question": "Which HTTP methods should I use to send data to my API?",
+    "reference_answer": "POST (most common), PUT, DELETE or PATCH.",
+    "gold_sources": [
+      "tutorial/body.md"
+    ],
+    "answerable": true
+  },
+  {
+    "id": 9,
+    "question": "A client asks for an item that does not exist. How do I send back a not found response?",
+    "reference_answer": "Raise an HTTPException with status_code=404 and a detail message.",
+    "gold_sources": [
+      "tutorial/handling-errors.md"
+    ],
+    "answerable": true
+  },
+  {
+    "id": 10,
+    "question": "Do I return or raise an HTTPException?",
+    "reference_answer": "You raise it, because it is a normal Python exception; raising stops the rest of the path operation code.",
+    "gold_sources": [
+      "tutorial/handling-errors.md"
+    ],
+    "answerable": true
+  },
+  {
+    "id": 11,
+    "question": "Can the detail of an HTTPException be something other than a string?",
+    "reference_answer": "Yes, any value convertible to JSON such as a dict or a list.",
+    "gold_sources": [
+      "tutorial/handling-errors.md"
+    ],
+    "answerable": true
+  },
+  {
+    "id": 12,
+    "question": "How can I run a slow job, like sending an email, after the response has already been returned?",
+    "reference_answer": "Declare a BackgroundTasks parameter in the path operation function and call add_task() with the task function and its arguments.",
+    "gold_sources": [
+      "tutorial/background-tasks.md"
+    ],
+    "answerable": true
+  },
+  {
+    "id": 13,
+    "question": "What arguments does add_task receive?",
+    "reference_answer": "The task function, then any positional arguments, then any keyword arguments to pass to that function.",
+    "gold_sources": [
+      "tutorial/background-tasks.md"
+    ],
+    "answerable": true
+  },
+  {
+    "id": 14,
+    "question": "When should I use Celery instead of BackgroundTasks?",
+    "reference_answer": "For heavy background computation that does not need to share memory or variables with the app, or that must run in multiple processes or servers.",
+    "gold_sources": [
+      "tutorial/background-tasks.md"
+    ],
+    "answerable": true
+  },
+  {
+    "id": 15,
+    "question": "How do I let a frontend on a different domain call my API?",
+    "reference_answer": "Add CORSMiddleware to the app with a list of allowed origins (allow_origins).",
+    "gold_sources": [
+      "tutorial/cors.md"
+    ],
+    "answerable": true
+  },
+  {
+    "id": 16,
+    "question": "Why does allow_origins=['*'] not work when my frontend sends cookies or Authorization headers?",
+    "reference_answer": "A wildcard excludes anything involving credentials; origins, methods and headers must be specified explicitly when allow_credentials is True.",
+    "gold_sources": [
+      "tutorial/cors.md"
+    ],
+    "answerable": true
+  },
+  {
+    "id": 17,
+    "question": "What HTTP methods does CORSMiddleware allow by default?",
+    "reference_answer": "Only GET.",
+    "gold_sources": [
+      "tutorial/cors.md"
+    ],
+    "answerable": true
+  },
+  {
+    "id": 18,
+    "question": "How long do browsers cache CORS responses by default?",
+    "reference_answer": "600 seconds (max_age default).",
+    "gold_sources": [
+      "tutorial/cors.md"
+    ],
+    "answerable": true
+  },
+  {
+    "id": 19,
+    "question": "What counts as an origin in CORS?",
+    "reference_answer": "The combination of protocol, domain and port; differences in any of them make a different origin.",
+    "gold_sources": [
+      "tutorial/cors.md"
+    ],
+    "answerable": true
+  },
+  {
+    "id": 20,
+    "question": "How do I accept a file upload from a client?",
+    "reference_answer": "Declare a parameter with File or UploadFile (after installing python-multipart), since files are sent as form data.",
+    "gold_sources": [
+      "tutorial/request-files.md"
+    ],
+    "answerable": true
+  },
+  {
+    "id": 21,
+    "question": "Why would I use UploadFile instead of bytes for uploads?",
+    "reference_answer": "UploadFile uses a spooled file (memory up to a limit then disk), so it handles large files, exposes metadata and has an async file-like interface.",
+    "gold_sources": [
+      "tutorial/request-files.md"
+    ],
+    "answerable": true
+  },
+  {
+    "id": 22,
+    "question": "What attributes does UploadFile expose?",
+    "reference_answer": "filename, content_type and file (a SpooledTemporaryFile).",
+    "gold_sources": [
+      "tutorial/request-files.md"
+    ],
+    "answerable": true
+  },
+  {
+    "id": 23,
+    "question": "How do I change the HTTP status code of a response?",
+    "reference_answer": "Pass the status_code parameter to the path operation decorator (e.g. @app.post(..., status_code=201)).",
+    "gold_sources": [
+      "tutorial/response-status-code.md"
+    ],
+    "answerable": true
+  },
+  {
+    "id": 24,
+    "question": "Which status code should I return after creating a new record?",
+    "reference_answer": "201, Created.",
+    "gold_sources": [
+      "tutorial/response-status-code.md"
+    ],
+    "answerable": true
+  },
+  {
+    "id": 25,
+    "question": "How do I write automated tests for my FastAPI app?",
+    "reference_answer": "Use TestClient (needs httpx) with pytest: create a client from the app, call it like httpx and assert on the response.",
+    "gold_sources": [
+      "tutorial/testing.md"
+    ],
+    "answerable": true
+  },
+  {
+    "id": 26,
+    "question": "Do my test functions need to be async?",
+    "reference_answer": "No, test functions are normal def functions and calls to the client are normal calls without await.",
+    "gold_sources": [
+      "tutorial/testing.md"
+    ],
+    "answerable": true
+  },
+  {
+    "id": 27,
+    "question": "How do I serve static files such as images or CSS?",
+    "reference_answer": "Import StaticFiles and mount a StaticFiles(directory=...) instance on a path such as /static.",
+    "gold_sources": [
+      "tutorial/static-files.md"
+    ],
+    "answerable": true
+  },
+  {
+    "id": 28,
+    "question": "What does it mean to mount an application?",
+    "reference_answer": "Adding a complete independent application at a specific path that handles all sub-paths; its docs and OpenAPI are not part of the main app.",
+    "gold_sources": [
+      "tutorial/static-files.md"
+    ],
+    "answerable": true
+  },
+  {
+    "id": 29,
+    "question": "How do I write a function that runs for every request and response?",
+    "reference_answer": "Use the @app.middleware('http') decorator on a function that receives request and call_next and returns the response.",
+    "gold_sources": [
+      "tutorial/middleware.md"
+    ],
+    "answerable": true
+  },
+  {
+    "id": 30,
+    "question": "If I add several middlewares, which one runs first?",
+    "reference_answer": "The last middleware added is outermost and runs first on the request path and last on the response path.",
+    "gold_sources": [
+      "tutorial/middleware.md"
+    ],
+    "answerable": true
+  },
+  {
+    "id": 31,
+    "question": "How do I limit a query parameter to at most 50 characters?",
+    "reference_answer": "Use Annotated[str | None, Query(max_length=50)].",
+    "gold_sources": [
+      "tutorial/query-params-str-validations.md"
+    ],
+    "answerable": true
+  },
+  {
+    "id": 32,
+    "question": "Can I validate a query parameter against a regular expression?",
+    "reference_answer": "Yes, with the pattern parameter of Query.",
+    "gold_sources": [
+      "tutorial/query-params-str-validations.md"
+    ],
+    "answerable": true
+  },
+  {
+    "id": 33,
+    "question": "How do I require a path parameter to be an integer greater than or equal to 1?",
+    "reference_answer": "Use Path(ge=1) in Annotated.",
+    "gold_sources": [
+      "tutorial/path-params-numeric-validations.md"
+    ],
+    "answerable": true
+  },
+  {
+    "id": 34,
+    "question": "How can I stop a user's password from appearing in the API response?",
+    "reference_answer": "Declare an output model without the password field and use it as response_model (or return type) so FastAPI filters the data.",
+    "gold_sources": [
+      "tutorial/response-model.md"
+    ],
+    "answerable": true
+  },
+  {
+    "id": 35,
+    "question": "What happens if I declare both a return type annotation and response_model?",
+    "reference_answer": "The response_model takes priority and is the one FastAPI uses.",
+    "gold_sources": [
+      "tutorial/response-model.md"
+    ],
+    "answerable": true
+  },
+  {
+    "id": 36,
+    "question": "How do I share logic like common query parameters between several endpoints?",
+    "reference_answer": "Write a dependency function and declare it with Depends(), passing the function without calling it.",
+    "gold_sources": [
+      "tutorial/dependencies/index.md"
+    ],
+    "answerable": true
+  },
+  {
+    "id": 37,
+    "question": "How does FastAPI read headers like user-agent from a parameter named user_agent?",
+    "reference_answer": "Header automatically converts underscores to hyphens; set convert_underscores=False to disable it.",
+    "gold_sources": [
+      "tutorial/header-params.md"
+    ],
+    "answerable": true
+  },
+  {
+    "id": 38,
+    "question": "Should I define my endpoints with async def or def?",
+    "reference_answer": "Use async def if your libraries support await; otherwise use normal def. You can mix both and FastAPI handles them correctly.",
+    "gold_sources": [
+      "async.md"
+    ],
+    "answerable": true
+  },
+  {
+    "id": 39,
+    "question": "What do I need to install to receive form fields?",
+    "reference_answer": "python-multipart, and then declare parameters with Form.",
+    "gold_sources": [
+      "tutorial/request-forms.md"
+    ],
+    "answerable": true
+  },
+  {
+    "id": 40,
+    "question": "What is the difference between PUT and PATCH for updating data?",
+    "reference_answer": "PUT replaces the existing data; PATCH updates partially, typically using exclude_unset in model_dump to apply only the sent fields.",
+    "gold_sources": [
+      "tutorial/body-updates.md"
+    ],
+    "answerable": true
+  },
+  {
+    "id": 41,
+    "question": "What library does the docs example use for SQL databases?",
+    "reference_answer": "SQLModel, built on SQLAlchemy and Pydantic; table models use table=True.",
+    "gold_sources": [
+      "tutorial/sql-databases.md"
+    ],
+    "answerable": true
+  },
+  {
+    "id": 42,
+    "question": "What does tokenUrl mean in OAuth2PasswordBearer?",
+    "reference_answer": "The URL the client uses to send the username and password to get a token; requests then send Authorization: Bearer <token>.",
+    "gold_sources": [
+      "tutorial/security/first-steps.md"
+    ],
+    "answerable": true
+  },
+  {
+    "id": 43,
+    "question": "Where is the OpenAPI schema served by default and how can I change it?",
+    "reference_answer": "At /openapi.json; change it with the openapi_url parameter.",
+    "gold_sources": [
+      "tutorial/metadata.md"
+    ],
+    "answerable": true
+  },
+  {
+    "id": 44,
+    "question": "How do I start the server from inside my Python file for debugging?",
+    "reference_answer": "Import uvicorn and call uvicorn.run(app, host=..., port=...) inside an if __name__ == '__main__' block.",
+    "gold_sources": [
+      "tutorial/debugging.md"
+    ],
+    "answerable": true
+  },
+  {
+    "id": 45,
+    "question": "Who won the 2022 football World Cup?",
+    "reference_answer": "NOT_IN_DOCS",
+    "gold_sources": [],
+    "answerable": false
+  },
+  {
+    "id": 46,
+    "question": "What is a good recipe for sourdough bread?",
+    "reference_answer": "NOT_IN_DOCS",
+    "gold_sources": [],
+    "answerable": false
+  },
+  {
+    "id": 47,
+    "question": "How do I train a convolutional neural network on image data with PyTorch?",
+    "reference_answer": "NOT_IN_DOCS",
+    "gold_sources": [],
+    "answerable": false
+  }
+]

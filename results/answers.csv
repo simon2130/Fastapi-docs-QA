@@ -1,0 +1,760 @@
+retriever,id,answerable,question,reference,answer,sources,gold_in_top4,token_f1,refused,human_correct,human_faithful
+bm25,1,True,How do I make a query parameter optional?,"Give the parameter a default value of None, e.g. q: str | None = None.","To make a query parameter optional, you should not declare any default value for it. If you want to make a query parameter required, you can just not declare any default value.",tutorial/query-param-models.md | tutorial/cookie-param-models.md | tutorial/header-param-models.md | tutorial/query-params.md,True,0.174,False,,
+bm25,2,True,"If a route has skip=0 and limit=10 as defaults and I request /items/?skip=20, what values does my function get?",skip=20 (from the URL) and limit=10 (the default).,"Your function gets `skip=20` and `limit=10`. The `skip` parameter is explicitly set in the URL, while `limit` retains its default value of `10`.",tutorial/query-params.md | tutorial/query-params.md | tutorial/dependencies/index.md | tutorial/query-param-models.md,True,0.514,False,,
+bm25,3,True,What exactly is the query part of a URL?,"The set of key-value pairs after the ? in a URL, separated by & characters.","The query part of a URL consists of key-value pairs that follow the `?` symbol in the URL and are separated by `&` characters. These pairs represent additional information that is sent along with the main request and are typically used to filter or customize the response. For instance, in the URL `http://127.0.0.1:8000/items/?skip=0&limit=10`, `skip` and `limit` are query parameters where `skip` has a value of `0` and `limit` has a value of `10`.",tutorial/query-params.md | advanced/openapi-callbacks.md | tutorial/query-params.md | tutorial/path-params-numeric-validations.md,True,0.25,False,,
+bm25,4,True,What response do I get if a path parameter declared as int receives the value foo?,"An HTTP error with a JSON detail saying the input should be a valid integer (type int_parsing), pointing to path > item_id.","```json
+{
+  ""detail"": [
+    {
+      ""type"": ""int_parsing"",
+      ""loc"": [
+        ""path"",
+        ""item_id""
+      ],
+      ""msg"": ""Input should be a valid integer, unable to parse string as an integer"",
+      ""input"": ""foo""
+    }
+  ]
+}
+```",tutorial/path-params.md | tutorial/body.md | tutorial/path-params.md | tutorial/body-multiple-params.md,True,0.636,False,,
+bm25,5,True,How do I declare the type of a path parameter?,"Use standard Python type annotations on the function parameter, e.g. item_id: int.","To declare the type of a path parameter, you can use the `Path` annotation. For example, if you want to declare a `title` metadata value for the path parameter `item_id`, you can type:
+
+```python
+@router.get(""/items/{item_id}"")
+async def read_item(item_id: int):
+    ...
+```
+
+This specifies that `item_id` must be an integer.",tutorial/path-params-numeric-validations.md | tutorial/response-model.md | tutorial/background-tasks.md | tutorial/testing.md,False,0.219,False,,
+bm25,6,True,How do I declare the JSON body that a client sends to my endpoint?,Create a Pydantic model that inherits from BaseModel and declare it as the type of a path operation function parameter.,"To declare the JSON body that a client sends to your endpoint, you should use Pydantic models. These models allow you to define the structure of the request body, ensuring that the data sent matches the expected format. You can then use these models to validate the incoming data in your FastAPI endpoints. For example, if you want to accept a JSON body with fields `id`, `customer`, and `total`, you would create a Pydantic model like this:
+
+```python
+from pydantic import BaseModel
+
+class Invoice(BaseModel):
+    id: str
+    customer: str
+    total: str
+```
+
+Then, in your FastAPI endpoint, you can use this model to parse the incoming request body:
+
+```python
+from fastapi import FastAPI, Request
+from pydantic import BaseModel
+
+app = FastAPI()
+
+class Invoice(BaseModel):
+    id: str
+    customer: str
+    total: str
+
+@app.post(""/invoices/"")
+async def create_invoice(request: Request):
+    new_invoice = await request.json()
+    return Invoice(**new_invoice).dict()  # Convert Pydantic model back to dict
+```
+
+Sources: [1], [3]",tutorial/testing.md | advanced/generate-clients.md | tutorial/body.md | advanced/openapi-callbacks.md,True,0.139,False,,
+bm25,7,True,Can a GET request carry a request body in FastAPI?,"It is supported only for extreme cases but discouraged: behavior is undefined in the specs, Swagger UI will not document the body and proxies may not support it.","No, a GET request cannot carry a request body in FastAPI. It is explicitly stated that sending a body with a GET request has an undefined behavior according to the specifications, although it is supported by FastAPI for very complex/extreme use cases. However, this feature is discouraged and may not work as expected due to potential issues with proxy servers and the interactive documentation.",tutorial/body.md | tutorial/body-multiple-params.md | reference/request.md | advanced/using-request-directly.md,True,0.387,False,,
+bm25,8,True,Which HTTP methods should I use to send data to my API?,"POST (most common), PUT, DELETE or PATCH.","You should use `POST` to create data, `GET` to read data, `PUT` to update data, and `DELETE` to delete data.",tutorial/body-updates.md | tutorial/first-steps.md | advanced/opentelemetry.md | tutorial/cors.md,False,0.222,False,,
+bm25,9,True,A client asks for an item that does not exist. How do I send back a not found response?,Raise an HTTPException with status_code=404 and a detail message.,"To send back a not found response when a client asks for an item that does not exist, you should raise an `HTTPException` with an appropriate HTTP status code (404) and detail message. Here's how you can implement this:
+
+```python
+from fastapi import FastAPI, HTTPException
+
+app = FastAPI()
+
+@app.get(""/items/{item_id}"")
+def read_item(item_id: str):
+    if item_id != ""foo"":
+        raise HTTPException(status_code=404, detail=""Item not found"")
+    return {""item"": ""The Foo Wrestlers""}
+```
+
+In this example, if the client requests `/items/bar`, it will receive a 404 status code and a JSON response indicating that the item was not found.",tutorial/handling-errors.md | tutorial/handling-errors.md | tutorial/header-param-models.md | tutorial/stream-json-lines.md,True,0.183,False,,
+bm25,10,True,Do I return or raise an HTTPException?,"You raise it, because it is a normal Python exception; raising stops the rest of the path operation code.",Raise an `HTTPException`.,tutorial/handling-errors.md | reference/exceptions.md | tutorial/dependencies/dependencies-with-yield.md | tutorial/dependencies/dependencies-with-yield.md,True,0.091,False,,
+bm25,11,True,Can the detail of an HTTPException be something other than a string?,"Yes, any value convertible to JSON such as a dict or a list.","Yes, the detail of an HTTPException can be something other than a string. According to the documentation, when raising an HTTPException, you can pass any value that can be converted to JSON as the parameter detail, not only str. They are handled automatically by FastAPI and converted to JSON.",tutorial/handling-errors.md | tutorial/handling-errors.md | tutorial/query-params-str-validations.md | reference/exceptions.md,True,0.226,False,,
+bm25,12,True,"How can I run a slow job, like sending an email, after the response has already been returned?",Declare a BackgroundTasks parameter in the path operation function and call add_task() with the task function and its arguments.,"You can run a slow job, such as sending an email, after the response has already been returned by utilizing the BackgroundTasks feature in FastAPI. This allows you to initiate the task without blocking the response, ensuring the client receives the response immediately. Here's a simplified example based on the provided context:
+
+```python
+from fastapi import FastAPI, BackgroundTasks
+import asyncio
+
+app = FastAPI()
+
+@app.post(""/send_email/"")
+async def send_email(email_to: str, background_tasks: BackgroundTasks):
+    # Simulate a slow task, like sending an email
+    async def send_email_task(email_to):
+        await asyncio.sleep(5)  # Simulating a delay
+        print(f""Sending email to: {email_to}"")
+
+    background_tasks.add_task(send_email_task, email_to)
+    return {""message"": ""Email sending initiated""}
+```
+
+Sources: [1], [3]",tutorial/background-tasks.md | advanced/advanced-dependencies.md | tutorial/background-tasks.md | advanced/advanced-dependencies.md,True,0.109,False,,
+bm25,13,True,What arguments does add_task receive?,"The task function, then any positional arguments, then any keyword arguments to pass to that function.","`.add_task()` receives as arguments:
+
+* A task function to be run in the background (`write_notification`).
+* Any sequence of arguments that should be passed to the task function in order (`email`).
+* Any keyword arguments that should be passed to the task function (`message=""some notification""`).",tutorial/background-tasks.md | how-to/custom-request-and-route.md | advanced/middleware.md | tutorial/response-model.md,True,0.407,False,,
+bm25,14,True,When should I use Celery instead of BackgroundTasks?,"For heavy background computation that does not need to share memory or variables with the app, or that must run in multiple processes or servers.","You should use Celery instead of `BackgroundTasks` when you need to perform heavy background computation and do not necessarily need the task to be executed by the same process. Additionally, if you want to run background tasks in multiple processes or servers, Celery provides this capability which `BackgroundTasks` does not offer. However, if your tasks are simple and do not require sharing memory or accessing variables from the same FastAPI app, `BackgroundTasks` is sufficient.",tutorial/background-tasks.md | reference/background.md | tutorial/background-tasks.md | deployment/concepts.md,True,0.364,False,,
+bm25,15,True,How do I let a frontend on a different domain call my API?,Add CORSMiddleware to the app with a list of allowed origins (allow_origins).,"To allow a frontend on a different domain to call your FastAPI API, you can use OAuth2 for authentication. FastAPI provides tools to handle security, including OAuth2. You would need to configure your FastAPI app to require authentication for endpoints that should only be accessible to authenticated users. This typically involves setting up a token-based authentication system where the frontend sends a token in the Authorization header when making requests to your API. The backend verifies this token to determine if the request should be allowed access.",tutorial/security/first-steps.md | deployment/docker.md | alternatives.md | advanced/generate-clients.md,False,0.1,False,,
+bm25,16,True,Why does allow_origins=['*'] not work when my frontend sends cookies or Authorization headers?,"A wildcard excludes anything involving credentials; origins, methods and headers must be specified explicitly when allow_credentials is True.","When `allow_origins=['*']` is configured, it allows cross-origin requests but excludes any communication involving credentials such as cookies and Authorization headers. This is because the wildcard '*' matches all origins but does not permit sensitive information to be passed through these headers. For proper functionality, especially when dealing with tokens or other authentication mechanisms, it is recommended to specify the allowed origins explicitly. Sources: [3]",deployment/docker.md | tutorial/security/first-steps.md | tutorial/cors.md | tutorial/frontend.md,True,0.268,False,,
+bm25,17,True,What HTTP methods does CORSMiddleware allow by default?,Only GET.,CORSMiddleware allows the GET method by default. It does not allow other HTTP methods unless specified.,tutorial/cors.md | tutorial/cors.md | tutorial/first-steps.md | tutorial/query-params-str-validations.md,True,0.111,False,,
+bm25,18,True,How long do browsers cache CORS responses by default?,600 seconds (max_age default).,The default value for `max_age` in the `CORSMiddleware` implementation is 600 seconds.,tutorial/cors.md | tutorial/cors.md | advanced/middleware.md | tutorial/response-model.md,True,0.5,False,,
+bm25,19,True,What counts as an origin in CORS?,"The combination of protocol, domain and port; differences in any of them make a different origin.","An origin in CORS refers to the protocol, domain, and port combination from which a web page is loaded. This includes both the HTTP and HTTPS protocols, and can be specified using the `http://`, `https://`, or bare domain names. For example, `https://www.example.com` and `http://example.com` are two distinct origins.",tutorial/cors.md | tutorial/cors.md | tutorial/cors.md | tutorial/cors.md,True,0.261,False,,
+bm25,20,True,How do I accept a file upload from a client?,"Declare a parameter with File or UploadFile (after installing python-multipart), since files are sent as form data.","To accept a file upload from a client, you can use standard type annotations and set a default value of `None`. Here's an example:
+
+```python
+from fastapi import FastAPI, File, UploadFile, Form
+
+app = FastAPI()
+
+@app.post(""/uploadfile/"")
+async def create_upload_file(file: UploadFile = File(...)):
+    return {""filename"": file.filename}
+```
+
+In this example, `UploadFile` is used to handle file uploads. The `File(...)` annotation indicates that the `file` parameter is expected to be a file uploaded by the client. The `filename` key in the returned dictionary represents the name of the uploaded file.",tutorial/frontend.md | tutorial/request-files.md | advanced/generate-clients.md | deployment/server-workers.md,True,0.111,False,,
+bm25,21,True,Why would I use UploadFile instead of bytes for uploads?,"UploadFile uses a spooled file (memory up to a limit then disk), so it handles large files, exposes metadata and has an async file-like interface.","UploadFile is preferred over bytes for uploads because it allows for additional metadata to be attached to the file, such as the filename and content type. This metadata can be useful when handling files on the server side. Using bytes alone does not provide this information.",tutorial/request-files.md | tutorial/request-files.md | advanced/stream-data.md | tutorial/request-forms-and-files.md,True,0.194,False,,
+bm25,22,True,What attributes does UploadFile expose?,"filename, content_type and file (a SpooledTemporaryFile).","UploadFile exposes the following attributes:
+
+- `file`
+- `filename`
+- `size`
+- `headers`
+- `content_type`
+- `read`
+- `write`
+- `seek`
+- `close`",reference/uploadfile.md | tutorial/request-files.md | tutorial/request-files.md | tutorial/request-files.md,True,0.3,False,,
+bm25,23,True,How do I change the HTTP status code of a response?,"Pass the status_code parameter to the path operation decorator (e.g. @app.post(..., status_code=201)).","To change the HTTP status code of a response in FastAPI, you can use the `Response` parameter in your route function. This allows you to specify a different status code than the default one declared for the endpoint. For instance, if you want to return a `200` status code by default, but switch to a `201` status code when creating new data, you would modify your route function as follows:
+
+```python
+from fastapi import APIRouter, HTTPException, Response
+
+router = APIRouter()
+
+@router.post(""/create"")
+async def create_data(data: DataIn):
+    # Your logic to create data
+    created_data = create_new_data(data)
+    
+    if created_data:
+        return Response(status_code=201)  # Return 201 Created status code
+    else:
+        raise HTTPException(status_code=400, detail=""Data creation failed"")
+```
+
+This example shows how to conditionally return a `201` status code when a new resource is successfully created, while maintaining the ability to handle errors or other scenarios with appropriate status codes.
+Sources: [1], [3]",tutorial/response-status-code.md | advanced/response-change-status-code.md | advanced/response-change-status-code.md | tutorial/response-status-code.md,True,0.097,False,,
+bm25,24,True,Which status code should I return after creating a new record?,"201, Created.",201,tutorial/response-status-code.md | advanced/settings.md | advanced/response-change-status-code.md | advanced/security/http-basic-auth.md,True,0.667,False,,
+bm25,25,True,How do I write automated tests for my FastAPI app?,"Use TestClient (needs httpx) with pytest: create a client from the app, call it like httpx and assert on the response.","To write automated tests for your FastAPI app, you can use the `TestClient` provided by FastAPI. These tests are synchronous by default, but you can also use asynchronous functions if needed, especially when dealing with asynchronous operations such as database interactions. Here's a basic example of how to set up an asynchronous test:
+
+```python
+from fastapi.testclient import TestClient
+import pytest
+from main import app  # Assuming your FastAPI app is defined in a file named 'main.py'
+
+# Initialize the test client
+client = TestClient(app)
+
+def test_root():
+    response = client.get(""/"")
+    assert response.status_code == 200
+    assert response.json() == {""message"": ""Hello World""}
+
+@pytest.mark.asyncio
+async def test_root_async():
+    async with TestClient(app) as client:
+        response = await client.get(""/"")
+        assert response.status_code == 200
+        assert response.json() == {""message"": ""Hello World""}
+```
+
+In this example, `test_root` is a synchronous test, while `test_root_async` is an asynchronous test. The `@pytest.mark.asyncio` decorator is used to mark the test function as asynchronous. The `async with` statement is used to manage the lifecycle of the `TestClient` in an asynchronous context.
+Sources: [1], [2]",advanced/async-tests.md | how-to/migrate-from-pydantic-v1-to-pydantic-v2.md | deployment/docker.md | tutorial/dependencies/index.md,False,0.123,False,,
+bm25,26,True,Do my test functions need to be async?,"No, test functions are normal def functions and calls to the client are normal calls without await.","Yes, your test functions need to be asynchronous if you want to call asynchronous functions in your tests. This is due to the requirement that any test functions using the `TestClient` must themselves be asynchronous, even if the underlying FastAPI application uses synchronous functions. The `TestClient` relies on the `anyio` plugin to handle asynchronous calls, which necessitates that the test functions are also asynchronous.",advanced/async-tests.md | advanced/async-tests.md | async.md | advanced/async-tests.md,False,0.173,False,,
+bm25,27,True,How do I serve static files such as images or CSS?,Import StaticFiles and mount a StaticFiles(directory=...) instance on a path such as /static.,"To serve static files such as images or CSS, you can use the `StaticFiles` class from `fastapi.staticfiles`. First, you need to import it:
+
+```python
+from fastapi.staticfiles import StaticFiles
+```
+
+Then, you can mount the `StaticFiles` instance to a route in your FastAPI app. For example, to serve static files from a directory named ""static"" located in the root of your project, you can do:
+
+```python
+app.mount(""/static"", StaticFiles(directory=""static""), name=""static"")
+```
+
+This mounts the static files at the ""/static"" URL path, and you can access your CSS or image files via URLs like `http://<your-server>/static/styles.css` or `http://<your-server>/static/image.jpg`.",reference/staticfiles.md | how-to/custom-docs-ui-assets.md | how-to/custom-docs-ui-assets.md | advanced/templates.md,False,0.211,False,,
+bm25,28,True,What does it mean to mount an application?,Adding a complete independent application at a specific path that handles all sub-paths; its docs and OpenAPI are not part of the main app.,"To mount an application in FastAPI means to attach or integrate one application within another, typically at a specific path, allowing the second application to be accessed through the first. This is done using the `mount` method available on the main application object. In the context provided, it is demonstrated by mounting a sub-application (`subapi`) at the path `/subapi` within the main application (`app`).",deployment/index.md | advanced/sub-applications.md | advanced/sub-applications.md | advanced/behind-a-proxy.md,False,0.222,False,,
+bm25,29,True,How do I write a function that runs for every request and response?,Use the @app.middleware('http') decorator on a function that receives request and call_next and returns the response.,You can write a function that runs for every request and response by adding it as middleware to your FastAPI application. This middleware function will be executed before any request is processed and after the response is returned. You can use the `@app.middleware()` decorator or the `app.add_middleware()` method to add such middleware.,tutorial/middleware.md | advanced/testing-dependencies.md | tutorial/middleware.md | tutorial/background-tasks.md,True,0.361,False,,
+bm25,30,True,"If I add several middlewares, which one runs first?",The last middleware added is outermost and runs first on the request path and last on the response path.,"If you add several middlewares to your FastAPI application, the middleware that runs first on the request path is the innermost middleware, and the middleware that runs last on the response path is the outermost middleware. According to the provided tutorial, the execution order is as follows:
+
+- **Request**: MiddlewareB → MiddlewareA → route
+- **Response**: route → MiddlewareA → MiddlewareB
+
+So, MiddlewareB runs first on the request path and MiddlewareA runs last on the response path.",tutorial/middleware.md | advanced/middleware.md | deployment/concepts.md | alternatives.md,True,0.4,False,,
+bm25,31,True,How do I limit a query parameter to at most 50 characters?,"Use Annotated[str | None, Query(max_length=50)].","To limit a query parameter to at most 50 characters, you should use `Annotated` along with `Query` to specify the `max_length` attribute. This ensures that any value passed through the query parameter must be no longer than 50 characters. Here's how you can implement it:
+
+```python
+from fastapi import FastAPI, Annotated
+
+app = FastAPI()
+
+@app.get(""/items/"")
+async def read_items(q: Annotated[str, Query(max_length=50)]):
+    return {""q"": q}
+```
+
+In this example, the `read_items` function accepts a query parameter `q`. The `Annotated` decorator is used to specify that `q` should be a string (`str`) and that its length should not exceed 50 characters (`max_length=50`). FastAPI will validate this constraint and raise an error if the query parameter exceeds the specified length.",tutorial/query-params-str-validations.md | tutorial/query-params-str-validations.md | tutorial/query-params-str-validations.md | tutorial/query-params.md,True,0.093,False,,
+bm25,32,True,Can I validate a query parameter against a regular expression?,"Yes, with the pattern parameter of Query.","Yes, you can validate a query parameter against a regular expression by defining a regular expression pattern within the `Query` annotation. For instance, if you want to ensure that the parameter matches the pattern `fixedquery`, you can do so as shown in the tutorial:
+
+```Python
+q: str | None = Query(default=None, regex=r'^fixedquery$')
+```
+
+This configuration ensures that the `q` parameter must exactly match `fixedquery` and no other string.",tutorial/query-params-str-validations.md | tutorial/query-params-str-validations.md | advanced/openapi-callbacks.md | tutorial/query-params-str-validations.md,True,0.132,False,,
+bm25,33,True,How do I require a path parameter to be an integer greater than or equal to 1?,Use Path(ge=1) in Annotated.,"To require a path parameter to be an integer greater than or equal to 1, you should use the `ge=1` constraint. This can be seen in the following code snippet from the tutorial:
+
+{* ../../docs_src/path_params_numeric_validations/tutorial004.py hl[10] *}
+
+This indicates that the `item_id` path parameter must be an integer that is greater than or equal to 1.",tutorial/path-params-numeric-validations.md | tutorial/path-params-numeric-validations.md | tutorial/path-params-numeric-validations.md | tutorial/testing.md,True,0.154,False,,
+bm25,34,True,How can I stop a user's password from appearing in the API response?,Declare an output model without the password field and use it as response_model (or return type) so FastAPI filters the data.,"To prevent a user's password from appearing in the API response, you should avoid using the same model for both the input and output parameters when dealing with sensitive information such as passwords. Instead, create a new model specifically for the input that does not include the password field, and use a different model for the output that also excludes the password field. This way, even if the password is included in the input model, it won't appear in the output.",tutorial/security/first-steps.md | tutorial/security/oauth2-jwt.md | tutorial/response-model.md | tutorial/debugging.md,True,0.192,False,,
+bm25,35,True,What happens if I declare both a return type annotation and response_model?,The response_model takes priority and is the one FastAPI uses.,"If both a return type annotation and `response_model` are declared, `response_model` will take precedence and be used by FastAPI. This allows for correct type annotations to be maintained for functions returning types different from the `response_model`, while still benefiting from FastAPI's data validation, documentation, and other features associated with the `response_model`.",tutorial/response-model.md | tutorial/response-model.md | tutorial/response-model.md | advanced/advanced-python-types.md,True,0.161,False,,
+bm25,36,True,How do I share logic like common query parameters between several endpoints?,"Write a dependency function and declare it with Depends(), passing the function without calling it.","To share logic like common query parameters between several endpoints, you can utilize the `Query` parameter along with Pydantic models. This allows you to define a model that includes the shared query parameters and then use this model in your endpoint functions. Here's how you can achieve this:
+
+1. Define a Pydantic model that includes the shared query parameters.
+2. Use this model in your endpoint functions to extract the parameters.
+
+Here's an example based on the information provided:
+
+```python
+from fastapi import FastAPI, Query
+from pydantic import BaseModel
+
+app = FastAPI()
+
+class ItemParams(BaseModel):
+    limit: int = Query(None, ge=0, le=100, description=""Number of items to return"")
+    tool: str = Query(None, min_length=1, max_length=10, regex='^[a-zA-Z0-9_]*$', description=""Tool name"")
+
+@app.get(""/items/"")
+async def read_items(params: ItemParams):
+    return {""limit"": params.limit, ""tool"": params.tool}
+
+@app.get(""/items/{item_id}"")
+async def read_item(item_id: int, params: ItemParams):
+    return {""item_id"": item_id, ""tool"": params.tool}
+```
+
+In this example, the `ItemParams` model defines the shared query parameters `limit` and `tool`. These parameters are used in two different endpoints (`/items/` and `/items/{item_id}`). The `",advanced/events.md | tutorial/path-params-numeric-validations.md | tutorial/cookie-params.md | tutorial/query-param-models.md,False,0.04,False,,
+bm25,37,True,How does FastAPI read headers like user-agent from a parameter named user_agent?,Header automatically converts underscores to hyphens; set convert_underscores=False to disable it.,"FastAPI reads headers like `user-agent` from a parameter named `user_agent` by default converting the parameter name from underscore (`_`) to hyphen (`-`). This conversion is done automatically if the `convert_underscores` parameter of `Header` is set to `True`. If `convert_underscores` is set to `False`, the header must be declared with all capital letters, such as `User_Agent`.",tutorial/header-params.md | reference/response.md | advanced/response-headers.md | reference/status.md,True,0.209,False,,
+bm25,38,True,Should I define my endpoints with async def or def?,Use async def if your libraries support await; otherwise use normal def. You can mix both and FastAPI handles them correctly.,"You should define your endpoints with `async def` if they involve asynchronous operations such as I/O or other tasks that may block the event loop. However, if your endpoint is purely computational and does not require asynchronous handling, you can use `def`. In FastAPI, `async def` is recommended for ensuring proper handling of asynchronous operations, but `def` is acceptable for non-blocking operations.",tutorial/dependencies/index.md | async.md | tutorial/background-tasks.md | async.md,True,0.235,False,,
+bm25,39,True,What do I need to install to receive form fields?,"python-multipart, and then declare parameters with Form.","To receive form fields, you need to install `python-multipart`.",tutorial/request-forms.md | tutorial/request-forms-and-files.md | tutorial/request-form-models.md | tutorial/request-form-models.md,True,0.333,False,,
+bm25,40,True,What is the difference between PUT and PATCH for updating data?,"PUT replaces the existing data; PATCH updates partially, typically using exclude_unset in model_dump to apply only the sent fields.","The key difference between PUT and PATCH for updating data lies in their approach to data transmission:
+
+- **PUT**: This method typically replaces the entire resource with the new representation sent in the request. It is generally used when you want to ensure that the server has a complete and up-to-date view of the resource.
+
+- **PATCH**: This method allows for partial updates, meaning you can send only the parts of the resource that have changed. It is useful when you want to update specific fields without having to resend the entire resource.
+
+In the context of FastAPI, both methods can be used for partial updates, but PATCH is highlighted as the recommended choice for these use cases due to its ability to handle partial updates efficiently. However, PUT can also be used for partial updates if desired, though it may require additional handling on the client side to ensure only the necessary parts of the resource are sent.",tutorial/body-updates.md | tutorial/body-updates.md | deployment/concepts.md | alternatives.md,True,0.146,False,,
+bm25,41,True,What library does the docs example use for SQL databases?,"SQLModel, built on SQLAlchemy and Pydantic; table models use table=True.",SQLModel,tutorial/sql-databases.md | how-to/testing-database.md | tutorial/sql-databases.md | tutorial/sql-databases.md,True,0.167,False,,
+bm25,42,True,What does tokenUrl mean in OAuth2PasswordBearer?,The URL the client uses to send the username and password to get a token; requests then send Authorization: Bearer <token>.,tokenUrl is the URL that the client (the frontend running in the user's browser) will use to send the username and password in order to get a token.,tutorial/security/first-steps.md | deployment/index.md | tutorial/security/first-steps.md | tutorial/bigger-applications.md,True,0.56,False,,
+bm25,43,True,Where is the OpenAPI schema served by default and how can I change it?,At /openapi.json; change it with the openapi_url parameter.,"By default, the OpenAPI schema is served at `/openapi.json`. To change it, you can use the `openapi_url` parameter. For instance, to serve it at `/api/v1/openapi.json`, you would modify your configuration as follows:
+
+```python
+# tutorial/metadata.md :: OpenAPI URL
+app = FastAPI(openapi_url=""/api/v1/openapi.json"")
+```
+
+Sources: [1], [3]",tutorial/metadata.md | how-to/separate-openapi-schemas.md | tutorial/metadata.md | tutorial/first-steps.md,True,0.262,False,,
+bm25,44,True,How do I start the server from inside my Python file for debugging?,"Import uvicorn and call uvicorn.run(app, host=..., port=...) inside an if __name__ == '__main__' block.","To start the server from inside your Python file for debugging, you can use the command:
+
+```console
+uv run python myapp.py
+```
+
+This command tells Uvicorn to run the server defined in your `myapp.py` file, and it will allow you to set breakpoints and debug your code. The `__name__ == ""__main__""` condition ensures that the server starts only when the file is run directly, not when it's imported as a module.",tutorial/debugging.md | tutorial/debugging.md | advanced/advanced-python-types.md | tutorial/bigger-applications.md,True,0.138,False,,
+bm25,45,False,Who won the 2022 football World Cup?,NOT_IN_DOCS,I don't know.,advanced/wsgi.md | tutorial/first-steps.md | advanced/custom-response.md | advanced/behind-a-proxy.md,,,True,,
+bm25,46,False,What is a good recipe for sourdough bread?,NOT_IN_DOCS,I don't know.,deployment/index.md | alternatives.md | async.md | how-to/custom-request-and-route.md,,,True,,
+bm25,47,False,How do I train a convolutional neural network on image data with PyTorch?,NOT_IN_DOCS,I don't know.,deployment/docker.md | deployment/server-workers.md | async.md | tutorial/testing.md,,,True,,
+dense,1,True,How do I make a query parameter optional?,"Give the parameter a default value of None, e.g. q: str | None = None.","To make a query parameter optional, you can set its default value to `None`. This tells FastAPI that if the parameter is not provided in the request, it should be treated as `None`.",tutorial/query-params.md | tutorial/query-params.md | tutorial/query-params.md | tutorial/query-params-str-validations.md,True,0.298,True,,
+dense,2,True,"If a route has skip=0 and limit=10 as defaults and I request /items/?skip=20, what values does my function get?",skip=20 (from the URL) and limit=10 (the default).,"Your function gets `skip=20` and `limit=10`. The `skip` parameter is explicitly set in the URL, while `limit` has its default value of `10`.",tutorial/query-params.md | tutorial/query-params.md | tutorial/response-model.md | tutorial/query-params.md,True,0.514,False,,
+dense,3,True,What exactly is the query part of a URL?,"The set of key-value pairs after the ? in a URL, separated by & characters.","The query part of a URL consists of key-value pairs that follow the `?` symbol in the URL. These pairs are separated by the `&` character. They are typically used to pass additional information to a web server, such as search terms, sorting preferences, or pagination settings. For example, in the URL `http://127.0.0.1:8000/items/?skip=0&limit=10`, `skip` and `limit` are query parameters with their respective values.",tutorial/query-params.md | tutorial/query-params.md | tutorial/query-params-str-validations.md | advanced/openapi-callbacks.md,True,0.256,False,,
+dense,4,True,What response do I get if a path parameter declared as int receives the value foo?,"An HTTP error with a JSON detail saying the input should be a valid integer (type int_parsing), pointing to path > item_id.","{""item_id"": ""foo""}
+Sources: [1], [2], [3]",tutorial/path-params.md | tutorial/path-params.md | tutorial/path-params.md | tutorial/path-params.md,True,0.074,False,,
+dense,5,True,How do I declare the type of a path parameter?,"Use standard Python type annotations on the function parameter, e.g. item_id: int.","You can declare the type of a path parameter in the function, using standard Python type annotations. For example:
+
+```python
+@router.get(""/items/{item_id}"", response_model=Item)
+def read_item(item_id: int):
+    return {""item_id"": item_id}
+```
+
+In this case, `item_id` is declared to be an `int`.",tutorial/path-params.md | tutorial/path-params.md | tutorial/path-params-numeric-validations.md | tutorial/body.md,True,0.321,False,,
+dense,6,True,How do I declare the JSON body that a client sends to my endpoint?,Create a Pydantic model that inherits from BaseModel and declare it as the type of a path operation function parameter.,"To declare the JSON body that a client sends to your endpoint, you should use Pydantic models. Here is an example based on the information provided:
+
+```python
+from fastapi import FastAPI
+from pydantic import BaseModel
+
+app = FastAPI()
+
+class Item(BaseModel):
+    name: str
+    description: str = None
+    price: float
+    tax: float = None
+
+@app.post(""/items/"")
+async def create_item(item: Item):
+    return item
+```
+
+In this example, `Item` is a Pydantic model that defines the structure of the JSON body expected at the `/items/` endpoint. The `create_item` function takes an instance of `Item` as its argument, which allows FastAPI to automatically handle reading the request body as JSON, converting the data types, validating the data, and providing rich completion support for the attributes of the `Item` model.",tutorial/body.md | tutorial/server-sent-events.md | advanced/json-base64-bytes.md | tutorial/body.md,True,0.182,False,,
+dense,7,True,Can a GET request carry a request body in FastAPI?,"It is supported only for extreme cases but discouraged: behavior is undefined in the specs, Swagger UI will not document the body and proxies may not support it.","No
+
+Sources: [2], [4]",advanced/using-request-directly.md | tutorial/body.md | tutorial/body.md | tutorial/body.md,True,0.0,False,,
+dense,8,True,Which HTTP methods should I use to send data to my API?,"POST (most common), PUT, DELETE or PATCH.","You should use `POST`, `PUT`, `DELETE` or `PATCH` to send data to your API. `POST` is the most common method for sending data. `GET` requests do not typically include a request body, although they can have query parameters. Sending a body with a `GET` request is not recommended due to its undefined behavior according to the specifications.",alternatives.md | tutorial/first-steps.md | tutorial/body.md | tutorial/handling-errors.md,True,0.219,False,,
+dense,9,True,A client asks for an item that does not exist. How do I send back a not found response?,Raise an HTTPException with status_code=404 and a detail message.,"To send back a not found response when a client asks for an item that does not exist, you can raise an `HTTPException` with an appropriate detail message. Here's how you can implement this:
+
+```python
+from fastapi import FastAPI, HTTPException
+
+app = FastAPI()
+
+@app.get(""/items/{item_id}"")
+async def read_item(item_id: int):
+    if item_id != 5:
+        raise HTTPException(status_code=404, detail=""Item not found"")
+    return {""item_id"": item_id}
+```
+
+In this example, if the `item_id` is not equal to 5, an `HTTPException` is raised with a status code of 404 and a detail message indicating that the item was not found. This will cause the client to receive an HTTP 404 Not Found response with the specified detail.",tutorial/handling-errors.md | index.md | tutorial/handling-errors.md | advanced/response-directly.md,True,0.16,False,,
+dense,10,True,Do I return or raise an HTTPException?,"You raise it, because it is a normal Python exception; raising stops the rest of the path operation code.",You raise an `HTTPException`.,tutorial/handling-errors.md | reference/exceptions.md | tutorial/handling-errors.md | tutorial/handling-errors.md,True,0.174,False,,
+dense,11,True,Can the detail of an HTTPException be something other than a string?,"Yes, any value convertible to JSON such as a dict or a list.","Yes, the detail of an HTTPException can be something other than a string. It can be any type of object that can be converted to JSON.",tutorial/handling-errors.md | reference/exceptions.md | tutorial/handling-errors.md | tutorial/handling-errors.md,True,0.256,False,,
+dense,12,True,"How can I run a slow job, like sending an email, after the response has already been returned?",Declare a BackgroundTasks parameter in the path operation function and call add_task() with the task function and its arguments.,"To run a slow job like sending an email after the response has already been returned, you can utilize the `BackgroundTasks` feature provided by FastAPI. Here's how you can implement it:
+
+First, ensure you import `BackgroundTasks` from `fastapi`:
+
+```python
+from fastapi import BackgroundTasks
+```
+
+Then, in your route handler, you can pass `BackgroundTasks` as a parameter and use it to schedule the background task:
+
+```python
+from fastapi import APIRouter, HTTPException
+from fastapi.responses import StreamingResponse
+import time
+
+router = APIRouter()
+
+@router.post(""/send_email"")
+async def send_email(email_to: str, background_tasks: BackgroundTasks):
+    # Simulate a slow operation, such as sending an email
+    await background_tasks.add_task(send_email_slowly, email_to)
+    
+    return {""message"": ""Email sending scheduled""}
+    
+async def send_email_slowly(email_to: str):
+    await asyncio.sleep(5)  # Simulating a delay
+    print(f""Sending email to {email_to}"")
+```
+
+In this example, `send_email_slowly` is a simulated slow operation. The `BackgroundTasks` instance is passed to the route handler and used to schedule the slow operation to run after the response is sent. This allows the client to receive the response immediately without waiting for the slow operation to complete.",tutorial/background-tasks.md | tutorial/middleware.md | reference/background.md | advanced/custom-response.md,True,0.113,False,,
+dense,13,True,What arguments does add_task receive?,"The task function, then any positional arguments, then any keyword arguments to pass to that function.","`.add_task()` receives as arguments:
+
+* A task function to be run in the background (`write_notification`).
+* Any sequence of arguments that should be passed to the task function in order (`email`).
+* Any keyword arguments that should be passed to the task function (`message=""some notification""`).
+
+Sources: [1], [3]",tutorial/background-tasks.md | tutorial/background-tasks.md | reference/background.md | tutorial/background-tasks.md,True,0.387,False,,
+dense,14,True,When should I use Celery instead of BackgroundTasks?,"For heavy background computation that does not need to share memory or variables with the app, or that must run in multiple processes or servers.","You should use Celery instead of BackgroundTasks when you need to perform heavy background computation that cannot be shared between processes, and you want to run these tasks in multiple processes and potentially on multiple servers. Celery also requires more complex configurations, including a message/job queue manager like RabbitMQ or Redis, which are not necessary when using BackgroundTasks within FastAPI.",tutorial/background-tasks.md | tutorial/background-tasks.md | reference/background.md | tutorial/background-tasks.md,True,0.302,False,,
+dense,15,True,How do I let a frontend on a different domain call my API?,Add CORSMiddleware to the app with a list of allowed origins (allow_origins).,"To let a frontend on a different domain call your API, you need to configure CORS (Cross-Origin Resource Sharing) settings on your backend. This involves adding headers to your responses that allow cross-origin requests. Specifically, you need to add the `Access-Control-Allow-Origin` header to indicate which domains are allowed to access your resources. Additionally, you may need to set up `Access-Control-Allow-Methods` and `Access-Control-Allow-Headers` to specify which HTTP methods and headers are allowed for cross-origin requests.
+
+Sources: [1], [2]",tutorial/frontend.md | tutorial/cors.md | tutorial/security/first-steps.md | tutorial/frontend.md,True,0.099,False,,
+dense,16,True,Why does allow_origins=['*'] not work when my frontend sends cookies or Authorization headers?,"A wildcard excludes anything involving credentials; origins, methods and headers must be specified explicitly when allow_credentials is True.","Because `allow_credentials` is set to `False` by default, which excludes credentials from being sent in cross-origin requests. When `allow_credentials` is set to `True`, the middleware allows cookies and Authorization headers to be sent, but only if the origins are explicitly specified. Using `'*'` for `allow_origins` with `allow_credentials=True` would allow credentials, but it would also allow any origin, which could be a security risk. Therefore, to support credentials while maintaining security, origins must be explicitly specified.",tutorial/cors.md | tutorial/cors.md | tutorial/cors.md | tutorial/cors.md,True,0.298,False,,
+dense,17,True,What HTTP methods does CORSMiddleware allow by default?,Only GET.,CORSMiddleware allows the GET method by default.,tutorial/cors.md | tutorial/cors.md | tutorial/cors.md | tutorial/cors.md,True,0.222,False,,
+dense,18,True,How long do browsers cache CORS responses by default?,600 seconds (max_age default).,The default caching period for CORS responses is 600 seconds.,tutorial/cors.md | tutorial/cors.md | tutorial/cors.md | tutorial/cors.md,True,0.429,False,,
+dense,19,True,What counts as an origin in CORS?,"The combination of protocol, domain and port; differences in any of them make a different origin.","An origin in CORS is the combination of protocol (`http`, `https`), domain (`myapp.com`, `localhost`, `localhost.tiangolo.com`), and port (`80`, `443`, `8080`). Examples of different origins include `http://localhost`, `https://localhost`, and `http://localhost:8080`, even though they may share the same domain, they differ in their protocol or port number.",tutorial/cors.md | tutorial/cors.md | tutorial/cors.md | tutorial/cors.md,True,0.324,False,,
+dense,20,True,How do I accept a file upload from a client?,"Declare a parameter with File or UploadFile (after installing python-multipart), since files are sent as form data.","To accept a file upload from a client, you can use the `File` object. This object is used to declare that a file should be uploaded in the request, which is sent as form data. Here's how you can use it:
+
+```Python
+from fastapi import File, UploadFile
+
+@app.post(""/uploadfile/"")
+async def create_upload_file(file: UploadFile = File(...)):
+    return {""filename"": file.filename}
+```
+
+In this example, `file: UploadFile = File(...)`, indicates that the `file` parameter expects an instance of `UploadFile`. The `File(...)` annotation tells FastAPI that the value of `file` will be a file uploaded by the client.",tutorial/request-files.md | tutorial/request-files.md | tutorial/request-files.md | tutorial/request-files.md,True,0.177,False,,
+dense,21,True,Why would I use UploadFile instead of bytes for uploads?,"UploadFile uses a spooled file (memory up to a limit then disk), so it handles large files, exposes metadata and has an async file-like interface.","You would use `UploadFile` instead of `bytes` for uploads because it allows you to handle larger files efficiently without consuming all the memory, provides metadata about the uploaded file, and offers a file-like interface that can be passed to other libraries expecting a file-like object. Additionally, it uses a ""spooled"" file that is stored in memory up to a maximum size limit and then stored on disk if necessary.",tutorial/request-files.md | tutorial/request-files.md | tutorial/request-files.md | tutorial/request-files.md,True,0.392,False,,
+dense,22,True,What attributes does UploadFile expose?,"filename, content_type and file (a SpooledTemporaryFile).","UploadFile exposes the following attributes:
+
+- `filename`: A `str` with the original file name that was uploaded.
+- `content_type`: A `str` with the content type (MIME type / media type).
+- `file`: A `SpooledTemporaryFile` (a file-like object), which is the actual Python file object that can be passed directly to other functions or libraries expecting a ""file-like"" object.",tutorial/request-files.md | tutorial/request-files.md | reference/uploadfile.md | tutorial/request-files.md,True,0.161,False,,
+dense,23,True,How do I change the HTTP status code of a response?,"Pass the status_code parameter to the path operation decorator (e.g. @app.post(..., status_code=201)).","To change the HTTP status code of a response in FastAPI, you can use a `Response` parameter in your path operation function. This allows you to set the `status_code` attribute on a temporary response object, which can then be returned along with any other data you wish to send back to the client. The `response_model` can still be used to filter and convert the data you return. Here is an example from the provided context:
+
+```python
+from fastapi import APIRouter, Depends, HTTPException, Response
+from pydantic import BaseModel
+
+router = APIRouter()
+
+class Item(BaseModel):
+    field: str
+
+@router.get(""/items/{item_id}"", response_model=Item)
+async def read_item(item_id: int, q: str | None = None, response: Response = Depends()):
+    if item_id not in {""10"", ""20""}:
+        raise HTTPException(status_code=404, detail=""Item not found"")
+    if q:
+        return {""item_id"": item_id, ""q"": q}
+    else:
+        response.status_code = 201  # Set the status code here
+        return {""item_id"": item_id}
+```
+
+In this example, if the `item_id` is not ""10"" or ""20"", an HTTP 404 error is raised. However, if `q` is present, an HTTP 200 OK response is returned. If `",advanced/response-change-status-code.md | advanced/response-change-status-code.md | advanced/response-change-status-code.md | tutorial/response-status-code.md,True,0.095,False,,
+dense,24,True,Which status code should I return after creating a new record?,"201, Created.",201,advanced/additional-status-codes.md | advanced/response-change-status-code.md | tutorial/response-status-code.md | advanced/additional-status-codes.md,True,0.667,False,,
+dense,25,True,How do I write automated tests for my FastAPI app?,"Use TestClient (needs httpx) with pytest: create a client from the app, call it like httpx and assert on the response.","To write automated tests for your FastAPI app, you can use the `TestClient` provided by Starlette. This client allows you to send HTTP requests to your FastAPI application and check the responses. For synchronous tests, you can use standard Python testing frameworks like pytest. However, if you need to test asynchronous functions, such as those involving asynchronous database operations, you should refer to the advanced tutorial on Async Tests, where you will learn how to use `async` functions within your tests.
+
+Sources: [1], [2], [3]",tutorial/testing.md | advanced/async-tests.md | tutorial/testing.md | tutorial/testing.md,True,0.189,False,,
+dense,26,True,Do my test functions need to be async?,"No, test functions are normal def functions and calls to the client are normal calls without await.","Yes, your test functions need to be `async` when using the `AsyncClient` for making asynchronous requests or calling other asynchronous functions in your tests.",advanced/async-tests.md | tutorial/testing.md | advanced/async-tests.md | advanced/async-tests.md,True,0.244,False,,
+dense,27,True,How do I serve static files such as images or CSS?,Import StaticFiles and mount a StaticFiles(directory=...) instance on a path such as /static.,"To serve static files such as images or CSS, you can use the `StaticFiles` class from `fastapi.staticfiles`. First, import `StaticFiles`:
+
+```python
+from fastapi.staticfiles import StaticFiles
+```
+
+Then, mount a `StaticFiles()` instance in a specific path where you want these files to be accessible. For example, if you want to serve static files from a directory named `static` located in the same directory as your main Python script, you can do:
+
+```python
+app.mount(""/static"", StaticFiles(directory=""static""), name=""static"")
+```
+
+This mounts the static files at the `/static` URL path. You can access your CSS or image files via URLs like `http://<your-server>/static/styles.css` or `http://<your-server>/static/image.jpg`.",reference/staticfiles.md | how-to/custom-docs-ui-assets.md | tutorial/static-files.md | advanced/templates.md,True,0.188,False,,
+dense,28,True,What does it mean to mount an application?,Adding a complete independent application at a specific path that handles all sub-paths; its docs and OpenAPI are not part of the main app.,"To mount an application means adding a completely ""independent"" application in a specific path, which then handles everything under that path, with the path operations declared in that sub-application. This differs from using an `APIRouter` where the main application's OpenAPI and docs do not include anything from the mounted application.",advanced/sub-applications.md | tutorial/static-files.md | advanced/sub-applications.md | advanced/sub-applications.md,True,0.416,False,,
+dense,29,True,How do I write a function that runs for every request and response?,Use the @app.middleware('http') decorator on a function that receives request and call_next and returns the response.,"To write a function that runs for every request and response, you would use middleware. Middleware is a function that gets passed every request and response while they are being processed by FastAPI. Here is an example based on the tutorial provided:
+
+{* ../../docs_src/middleware/tutorial001.py hl[10:13] *}
+
+This snippet shows how to add a middleware that measures the processing time of each request and adds a custom header `X-Process-Time` to the response. The middleware uses `time.perf_counter()` to measure the time taken for processing.",tutorial/middleware.md | tutorial/first-steps.md | tutorial/first-steps.md | advanced/wsgi.md,True,0.226,False,,
+dense,30,True,"If I add several middlewares, which one runs first?",The last middleware added is outermost and runs first on the request path and last on the response path.,The innermost middleware runs first on the request path.,tutorial/middleware.md | advanced/middleware.md | tutorial/middleware.md | advanced/middleware.md,True,0.571,False,,
+dense,31,True,How do I limit a query parameter to at most 50 characters?,"Use Annotated[str | None, Query(max_length=50)].","To limit a query parameter to at most 50 characters, you can use the `Query` function within an `Annotated` type, setting the `max_length` argument to 50. Here's how you can implement it:
+
+```Python
+from fastapi import FastAPI, Annotated
+
+app = FastAPI()
+
+@app.get(""/items/"")
+async def read_items(q: Annotated[str | None, Query(max_length=50)] = None):
+    return {""q"": q}
+```
+
+Sources: [1], [3]",tutorial/query-params-str-validations.md | tutorial/query-params-str-validations.md | tutorial/query-params-str-validations.md | tutorial/query-params-str-validations.md,True,0.206,False,,
+dense,32,True,Can I validate a query parameter against a regular expression?,"Yes, with the pattern parameter of Query.","Yes, you can validate a query parameter against a regular expression in FastAPI by defining a regular expression pattern within the `pattern` argument of the `Query` function.",tutorial/query-params-str-validations.md | tutorial/query-params-str-validations.md | tutorial/query-params-str-validations.md | tutorial/query-params-str-validations.md,True,0.353,False,,
+dense,33,True,How do I require a path parameter to be an integer greater than or equal to 1?,Use Path(ge=1) in Annotated.,"To require a path parameter to be an integer greater than or equal to 1, you can use the `ge=1` constraint as shown in the following code snippet from the tutorial:
+
+```python
+from fastapi import Path
+
+@router.get(""/items/{item_id}"")
+async def read_item(item_id: int = Path(gt=0, le=100, ge=1)):
+    return {""item_id"": item_id}
+```
+
+In this example, `item_id` is constrained to be an integer greater than or equal to 1 and less than or equal to 100. The `ge=1` part ensures that the value must be at least 1.",tutorial/path-params-numeric-validations.md | tutorial/path-params-numeric-validations.md | tutorial/path-params-numeric-validations.md | tutorial/path-params.md,True,0.102,False,,
+dense,34,True,How can I stop a user's password from appearing in the API response?,Declare an output model without the password field and use it as response_model (or return type) so FastAPI filters the data.,"To prevent a user's password from appearing in the API response, you should avoid storing the plain text password in your database and never send it in the response. Instead, hash the password before storing it and verify the hash during authentication. This ensures that even if the response includes sensitive information, it won't be in plain text. Additionally, follow best practices such as using secure authentication methods like OAuth2 and implementing role-based access control.",tutorial/response-model.md | tutorial/security/simple-oauth2.md | how-to/conditional-openapi.md | advanced/security/http-basic-auth.md,True,0.121,False,,
+dense,35,True,What happens if I declare both a return type annotation and response_model?,The response_model takes priority and is the one FastAPI uses.,"If both a return type annotation and `response_model` are declared, `response_model` will take priority and be used by FastAPI. This allows for correct type annotations to be used by tools and editors while still allowing FastAPI to handle data validation, documentation, and conversion/filtering based on the `response_model`.",tutorial/response-model.md | tutorial/response-model.md | tutorial/response-model.md | tutorial/response-model.md,True,0.172,False,,
+dense,36,True,How do I share logic like common query parameters between several endpoints?,"Write a dependency function and declare it with Depends(), passing the function without calling it.","To share logic like common query parameters between several endpoints, you can use Pydantic models to declare these parameters. This allows you to re-use the model in multiple places and declare validations and metadata for all the parameters at once. This feature was introduced in FastAPI version `0.115.0`. By creating a Pydantic model for your query parameters, you can ensure that they are validated independently but still grouped together logically. This approach helps maintain consistency across your application and simplifies the management of complex query parameters.",tutorial/query-param-models.md | tutorial/query-params.md | tutorial/query-param-models.md | tutorial/query-params-str-validations.md,False,0.077,False,,
+dense,37,True,How does FastAPI read headers like user-agent from a parameter named user_agent?,Header automatically converts underscores to hyphens; set convert_underscores=False to disable it.,"FastAPI reads headers like `user-agent` from a parameter named `user_agent` by default converting the underscore (`_`) in the parameter name to a hyphen (`-`). This conversion is done to match the standard naming convention for HTTP headers. Additionally, since HTTP headers are case-insensitive, FastAPI allows for the use of snake_case (underscore-separated words) in the parameter name, which is why `user_agent` works as expected.",tutorial/header-params.md | advanced/using-request-directly.md | tutorial/body.md | tutorial/header-param-models.md,True,0.052,False,,
+dense,38,True,Should I define my endpoints with async def or def?,Use async def if your libraries support await; otherwise use normal def. You can mix both and FastAPI handles them correctly.,"You should define your endpoints with `async def` if you are working within an asynchronous environment and want to take advantage of performance optimizations offered by FastAPI. However, if you are transitioning from another async framework and your endpoint is purely computational without any blocking I/O operations, you might prefer to use `def` for a slight performance benefit. FastAPI will handle the execution appropriately based on the type of function you define.",tutorial/dependencies/index.md | async.md | async.md | async.md,True,0.191,False,,
+dense,39,True,What do I need to install to receive form fields?,"python-multipart, and then declare parameters with Form.",You need to install `python-multipart`.,tutorial/request-forms-and-files.md | tutorial/request-forms.md | tutorial/request-form-models.md | tutorial/request-forms.md,True,0.286,False,,
+dense,40,True,What is the difference between PUT and PATCH for updating data?,"PUT replaces the existing data; PATCH updates partially, typically using exclude_unset in model_dump to apply only the sent fields.","The HTTP `PUT` operation is used to replace the entire content of the resource identified by the URI, whereas the HTTP `PATCH` operation is used to apply partial modifications to the resource. In the context of FastAPI, when using `PUT`, the entire resource is replaced with the new data sent in the request body, including default values for fields that were not explicitly set. On the other hand, `PATCH` allows sending only the data that needs to be updated, leaving the rest of the resource unchanged. This means that with `PATCH`, only the fields specified in the request body will be updated, and fields that are not included in the request body will remain unchanged, preserving their default values.",tutorial/body-updates.md | tutorial/body-updates.md | tutorial/body-updates.md | tutorial/body-updates.md,True,0.174,False,,
+dense,41,True,What library does the docs example use for SQL databases?,"SQLModel, built on SQLAlchemy and Pydantic; table models use table=True.",SQLModel,tutorial/sql-databases.md | tutorial/sql-databases.md | tutorial/sql-databases.md | tutorial/sql-databases.md,True,0.167,False,,
+dense,42,True,What does tokenUrl mean in OAuth2PasswordBearer?,The URL the client uses to send the username and password to get a token; requests then send Authorization: Bearer <token>.,tokenUrl in OAuth2PasswordBearer means the URL that the client (frontend running in the user's browser) should use to send the username and password to receive a token. It is used to specify the endpoint where the client sends its credentials to obtain an authentication token.,tutorial/security/first-steps.md | tutorial/security/first-steps.md | tutorial/security/simple-oauth2.md | tutorial/security/oauth2-jwt.md,True,0.418,False,,
+dense,43,True,Where is the OpenAPI schema served by default and how can I change it?,At /openapi.json; change it with the openapi_url parameter.,"By default, the OpenAPI schema is served at `/openapi.json`. You can change it by configuring the `openapi_url` parameter. For instance, to serve it at `/api/v1/openapi.json`, you would modify the `openapi_url` in your FastAPI configuration.",tutorial/metadata.md | how-to/extending-openapi.md | how-to/extending-openapi.md | how-to/extending-openapi.md,True,0.34,False,,
+dense,44,True,How do I start the server from inside my Python file for debugging?,"Import uvicorn and call uvicorn.run(app, host=..., port=...) inside an if __name__ == '__main__' block.","In Visual Studio Code, you can add a configuration to run the debugger with the option ""`Python: Current File (Integrated Terminal)`"". In PyCharm, you can select the file to debug from the ""Run"" menu under ""Debug..."". This will start the server with your FastAPI code and stop at your breakpoints.",tutorial/debugging.md | tutorial/debugging.md | deployment/manually.md | index.md,True,0.062,False,,
+dense,45,False,Who won the 2022 football World Cup?,NOT_IN_DOCS,I don't know.,index.md | index.md | history-design-future.md | index.md,,,True,,
+dense,46,False,What is a good recipe for sourdough bread?,NOT_IN_DOCS,I don't know.,how-to/index.md | tutorial/security/simple-oauth2.md | how-to/general.md | tutorial/first-steps.md,,,True,,
+dense,47,False,How do I train a convolutional neural network on image data with PyTorch?,NOT_IN_DOCS,I don't know. The provided context does not contain information related to training a convolutional neural network on image data with PyTorch.,advanced/dataclasses.md | advanced/dataclasses.md | tutorial/body.md | editor-support.md,,,True,,
+hybrid,1,True,How do I make a query parameter optional?,"Give the parameter a default value of None, e.g. q: str | None = None.","To make a query parameter optional, you can set its default value to `None`. This tells FastAPI that if the parameter is not provided in the request, it should be treated as `None`. For instance, in the following code snippet, the `q` parameter is declared as optional:
+
+{* ../../docs_src/query_params/tutorial002.py hl[7] *}
+
+However, if you want to make a query parameter required, you should not provide a default value at all. For example:
+
+{* ../../docs_src/query_params/tutorial005.py hl[6:7] *}",tutorial/query-params.md | tutorial/query-params.md | tutorial/query-param-models.md | tutorial/query-params-str-validations.md,True,0.168,True,,
+hybrid,2,True,"If a route has skip=0 and limit=10 as defaults and I request /items/?skip=20, what values does my function get?",skip=20 (from the URL) and limit=10 (the default).,"Your function gets `skip=20` and `limit=10`. The `skip` parameter is explicitly set in the URL, while `limit` has its default value.",tutorial/query-params.md | tutorial/query-params.md | tutorial/query-params.md | tutorial/response-model.md,True,0.545,False,,
+hybrid,3,True,What exactly is the query part of a URL?,"The set of key-value pairs after the ? in a URL, separated by & characters.","The query part of a URL consists of key-value pairs that follow the `?` symbol in the URL. These pairs are separated by the `&` character. They are typically used to pass additional information to a web server, such as search terms, sorting preferences, or pagination settings. For example, in the URL `http://127.0.0.1:8000/items/?skip=0&limit=10`, `skip` and `limit` are query parameters with their respective values.",tutorial/query-params.md | tutorial/query-params.md | tutorial/query-params-str-validations.md | advanced/openapi-callbacks.md,True,0.256,False,,
+hybrid,4,True,What response do I get if a path parameter declared as int receives the value foo?,"An HTTP error with a JSON detail saying the input should be a valid integer (type int_parsing), pointing to path > item_id.","```json
+{
+  ""detail"": [
+    {
+      ""type"": ""int_parsing"",
+      ""loc"": [
+        ""path"",
+        ""item_id""
+      ],
+      ""msg"": ""Input should be a valid integer, unable to parse string as an integer"",
+      ""input"": ""foo""
+    }
+  ]
+}
+```",tutorial/path-params.md | tutorial/path-params.md | tutorial/body.md | tutorial/path-params.md,True,0.636,False,,
+hybrid,5,True,How do I declare the type of a path parameter?,"Use standard Python type annotations on the function parameter, e.g. item_id: int.","You can declare the type of a path parameter in the function using standard Python type annotations. For example:
+
+```python
+from enum import Enum
+
+class ModelName(str, Enum):
+    alexnet = ""alexnet""
+    resnet = ""resnet""
+    lenet = ""lenet""
+
+@router.get(""/models/{model_name}"")
+async def get_model(model_name: ModelName):
+    if model_name == ModelName.alexnet:
+        return {""model_name"": model_name, ""message"": ""Deep Learning FTW!""}
+    elif model_name.value == ""lenet"":
+        return {""model_name"": model_name, ""message"": ""LeNet debuted in 1998, long before FastAPI could exist. Awesome!""}
+    else:
+        return {""model_name"": model_name, ""message"": ""Take a look at our model page to see the full list of models available.""}
+```
+
+In this example, `{model_name}` is declared to be of type `ModelName`, which is an enumeration. This approach provides both type safety and editor support.",tutorial/path-params-numeric-validations.md | tutorial/path-params.md | tutorial/path-params.md | tutorial/path-params.md,True,0.109,False,,
+hybrid,6,True,How do I declare the JSON body that a client sends to my endpoint?,Create a Pydantic model that inherits from BaseModel and declare it as the type of a path operation function parameter.,"To declare the JSON body that a client sends to your endpoint, you use Pydantic models to define the structure of the request body. You can create a Pydantic model class that matches the structure of the JSON data you want to receive. Then, you annotate the function parameter with this model class. For example:
+
+```python
+from pydantic import BaseModel
+from fastapi import FastAPI
+
+app = FastAPI()
+
+class Item(BaseModel):
+    name: str
+    description: str = None
+    price: float
+    tax: float = None
+
+@app.post(""/items/"")
+async def create_item(item: Item):
+    return item
+```
+
+This setup allows FastAPI to validate the incoming JSON against the defined schema and handle the conversion from the request body to the `Item` model instance.",tutorial/body.md | tutorial/body-multiple-params.md | tutorial/handling-errors.md | tutorial/stream-json-lines.md,True,0.207,False,,
+hybrid,7,True,Can a GET request carry a request body in FastAPI?,"It is supported only for extreme cases but discouraged: behavior is undefined in the specs, Swagger UI will not document the body and proxies may not support it.","No, a GET request cannot carry a request body in FastAPI. It has an undefined behavior according to the specifications, although it is supported by FastAPI for very complex/extreme use cases. The interactive docs with Swagger UI won't show the documentation for the body when using GET, and proxies in the middle might not support it.",tutorial/body.md | advanced/using-request-directly.md | tutorial/body-multiple-params.md | reference/request.md,True,0.442,False,,
+hybrid,8,True,Which HTTP methods should I use to send data to my API?,"POST (most common), PUT, DELETE or PATCH.","You should use `POST` (the most common), `PUT`, `DELETE` or `PATCH` to send data to your API. Sending a body with a `GET` request is discouraged according to the specifications, although it is supported by FastAPI.",tutorial/first-steps.md | tutorial/body-updates.md | tutorial/body.md | advanced/openapi-webhooks.md,True,0.326,False,,
+hybrid,9,True,A client asks for an item that does not exist. How do I send back a not found response?,Raise an HTTPException with status_code=404 and a detail message.,"To send back a not found response for an item that does not exist, you should raise an `HTTPException` with an appropriate HTTP status code and detail message. Here's how you can do it:
+
+```python
+from fastapi import FastAPI, HTTPException
+
+app = FastAPI()
+
+@app.get(""/items/{item_id}"")
+def read_item(item_id: str):
+    if item_id != ""foo"":
+        raise HTTPException(status_code=404, detail=""Item not found"")
+    return {""item"": ""The Foo Wrestlers""}
+```
+
+In this example, if the client requests `/items/bar`, they will receive a 404 status code and a JSON response indicating that the item was not found.",tutorial/handling-errors.md | tutorial/handling-errors.md | advanced/response-directly.md | tutorial/response-status-code.md,True,0.192,False,,
+hybrid,10,True,Do I return or raise an HTTPException?,"You raise it, because it is a normal Python exception; raising stops the rest of the path operation code.","Raise an `HTTPException`. Because it's a Python exception, you don't return it, you raise it.",tutorial/handling-errors.md | reference/exceptions.md | tutorial/dependencies/dependencies-with-yield.md | tutorial/dependencies/dependencies-with-yield.md,True,0.444,False,,
+hybrid,11,True,Can the detail of an HTTPException be something other than a string?,"Yes, any value convertible to JSON such as a dict or a list.","Yes, the detail of an HTTPException can be something other than a string. According to the documentation, ""When raising an HTTPException, you can pass any value that can be converted to JSON as the parameter detail, not only str."" This includes passing a dict, list, or other JSON-able data types.",tutorial/handling-errors.md | reference/exceptions.md | tutorial/handling-errors.md | tutorial/handling-errors.md,True,0.344,False,,
+hybrid,12,True,"How can I run a slow job, like sending an email, after the response has already been returned?",Declare a BackgroundTasks parameter in the path operation function and call add_task() with the task function and its arguments.,"To run a slow job like sending an email after the response has already been returned, you can utilize the `BackgroundTasks` feature in FastAPI. This allows you to schedule the task to run asynchronously after the response is sent. Here's how you can implement it:
+
+```python
+from fastapi import FastAPI, BackgroundTasks
+import time
+
+app = FastAPI()
+
+@app.post(""/send_email/"")
+async def send_email(email_to: str, background_tasks: BackgroundTasks):
+    background_tasks.add_task(send_email_background, email_to)
+    return {""message"": f""Email scheduled to be sent to {email_to}""}
+
+async def send_email_background(email_to: str):
+    await asyncio.sleep(5)  # Simulate a slow email sending process
+    with open(""emails_sent.log"", ""a"") as log_file:
+        log_file.write(f""Sent email to {email_to}\n"")
+```
+
+In this example, the `/send_email/` endpoint accepts an email address and adds a task to the `BackgroundTasks` object. The `send_email_background` function simulates a slow email sending process and writes the result to a log file. The `add_task` method schedules the task to run asynchronously after the response is sent.",tutorial/background-tasks.md | tutorial/background-tasks.md | advanced/advanced-dependencies.md | tutorial/background-tasks.md,True,0.124,False,,
+hybrid,13,True,What arguments does add_task receive?,"The task function, then any positional arguments, then any keyword arguments to pass to that function.","`.add_task()` receives as arguments:
+
+* A task function to be run in the background (`write_notification`).
+* Any sequence of arguments that should be passed to the task function in order (`email`).
+* Any keyword arguments that should be passed to the task function (`message=""some notification""`).
+
+Sources: [1], [3]",tutorial/background-tasks.md | tutorial/schema-extra-example.md | how-to/custom-request-and-route.md | tutorial/background-tasks.md,True,0.387,False,,
+hybrid,14,True,When should I use Celery instead of BackgroundTasks?,"For heavy background computation that does not need to share memory or variables with the app, or that must run in multiple processes or servers.","You should use Celery instead of BackgroundTasks when you need to perform heavy background computation that cannot be shared between processes (such as sharing memory or variables), and you want to run these tasks in multiple processes or even across multiple servers. Celery provides a more robust solution for such scenarios compared to the simpler approach offered by BackgroundTasks in FastAPI.",tutorial/background-tasks.md | reference/background.md | tutorial/background-tasks.md | tutorial/background-tasks.md,True,0.395,False,,
+hybrid,15,True,How do I let a frontend on a different domain call my API?,Add CORSMiddleware to the app with a list of allowed origins (allow_origins).,"To let a frontend on a different domain call your API, you should configure Cross-Origin Resource Sharing (CORS) on your backend. This involves setting appropriate headers in your responses to allow cross-origin requests. Specifically, you need to add the `Access-Control-Allow-Origin` header to indicate which domains are allowed to access your API. Additionally, you might want to consider adding other CORS headers such as `Access-Control-Allow-Methods`, `Access-Control-Allow-Headers`, and `Access-Control-Allow-Credentials` depending on your needs.
+
+Sources: [1], [2]",tutorial/security/first-steps.md | tutorial/cors.md | tutorial/frontend.md | advanced/strict-content-type.md,True,0.1,False,,
+hybrid,16,True,Why does allow_origins=['*'] not work when my frontend sends cookies or Authorization headers?,"A wildcard excludes anything involving credentials; origins, methods and headers must be specified explicitly when allow_credentials is True.","When `allow_origins=['*']` is set, it allows all origins including those that might be sending credentials such as cookies or Authorization headers. However, browsers enforce security restrictions on these types of data when making cross-origin requests. Specifically, the browser will not send cookies or Authorization headers unless the server explicitly allows them through the `Access-Control-Allow-Origin` header and possibly other headers like `Access-Control-Allow-Credentials`.
+
+Therefore, even though `allow_origins=['*']` might seem to allow all origins, it doesn't automatically grant permission for credentials. This is why you need to specify the allowed origins explicitly, allowing you to control which origins are permitted to send credentials.",tutorial/cors.md | tutorial/cors.md | tutorial/cors.md | tutorial/cors.md,True,0.127,False,,
+hybrid,17,True,What HTTP methods does CORSMiddleware allow by default?,Only GET.,CORSMiddleware allows the GET method by default.,tutorial/cors.md | tutorial/cors.md | tutorial/cors.md | tutorial/cors.md,True,0.222,False,,
+hybrid,18,True,How long do browsers cache CORS responses by default?,600 seconds (max_age default).,The default value for `max_age` in the `CORSMiddleware` is 600 seconds.,tutorial/cors.md | tutorial/cors.md | advanced/strict-content-type.md | tutorial/cors.md,True,0.533,False,,
+hybrid,19,True,What counts as an origin in CORS?,"The combination of protocol, domain and port; differences in any of them make a different origin.","An origin is the combination of protocol (`http`, `https`), domain (`myapp.com`, `localhost`, `localhost.tiangolo.com`), and port (`80`, `443`, `8080`).",tutorial/cors.md | tutorial/cors.md | tutorial/cors.md | tutorial/cors.md,True,0.432,False,,
+hybrid,20,True,How do I accept a file upload from a client?,"Declare a parameter with File or UploadFile (after installing python-multipart), since files are sent as form data.","To accept a file upload from a client, you can define a file parameter with a type of `UploadFile`. Here is an example:
+
+```python
+from fastapi import FastAPI, File, UploadFile
+
+app = FastAPI()
+
+@app.post(""/uploadfile/"")
+async def create_upload_file(file: UploadFile = File(...)):
+    return {""filename"": file.filename}
+```
+
+This code snippet defines a route at `/uploadfile/` where a file can be uploaded. The `UploadFile` type is used for the `file` parameter, which allows you to handle the file upload without having to deal with the raw bytes directly.",tutorial/request-files.md | tutorial/request-files.md | tutorial/request-files.md | tutorial/frontend.md,True,0.117,False,,
+hybrid,21,True,Why would I use UploadFile instead of bytes for uploads?,"UploadFile uses a spooled file (memory up to a limit then disk), so it handles large files, exposes metadata and has an async file-like interface.","Using `UploadFile` instead of `bytes` for uploads offers several advantages, including the ability to handle larger files efficiently, access to metadata about the uploaded file, and the use of a spooled file that can be stored in memory up to a certain limit before being saved to disk. Additionally, `UploadFile` provides a file-like interface and exposes an actual Python `SpooledTemporaryFile` object, which can be passed directly to other libraries expecting a file-like object. These features make `UploadFile` particularly suitable for handling large files such as images, videos, and large binaries.",tutorial/request-files.md | tutorial/request-files.md | tutorial/request-files.md | tutorial/request-forms-and-files.md,True,0.322,False,,
+hybrid,22,True,What attributes does UploadFile expose?,"filename, content_type and file (a SpooledTemporaryFile).","UploadFile exposes the following attributes:
+
+- `filename`: A `str` with the original file name that was uploaded.
+- `content_type`: A `str` with the content type (MIME type / media type).
+- `file`: A `SpooledTemporaryFile` (a file-like object), which is the actual Python file object.",tutorial/request-files.md | reference/uploadfile.md | tutorial/request-files.md | tutorial/request-files.md,True,0.213,False,,
+hybrid,23,True,How do I change the HTTP status code of a response?,"Pass the status_code parameter to the path operation decorator (e.g. @app.post(..., status_code=201)).","To change the HTTP status code of a response in FastAPI, you can use a `Response` parameter in your path operation function. This allows you to set the `status_code` attribute on a temporary response object, which can then be returned along with other data. The `response_model` can still be used to filter and convert the object you return. Here's a basic example of how to do this:
+
+```python
+from fastapi import APIRouter, Depends, HTTPException, Response
+from typing import Optional
+
+router = APIRouter()
+
+@router.get(""/items/{item_id}"", response_model=dict)
+async def read_item(item_id: int, q: Optional[str] = None, response: Response = Depends()):
+    if item_id not in {""10"", ""20""}:
+        response.status_code = 404
+        return {""error"": ""Item not found""}
+    return {""item_id"": item_id, ""q"": q}
+```
+
+In this example, if `item_id` is not ""10"" or ""20"", the status code is set to 404 and an error message is returned. Otherwise, a dictionary is returned. The `response_model` is used to filter and convert the object being returned.
+Sources: [1], [3]",advanced/response-change-status-code.md | advanced/response-change-status-code.md | advanced/response-change-status-code.md | tutorial/response-status-code.md,True,0.09,False,,
+hybrid,24,True,Which status code should I return after creating a new record?,"201, Created.",201,tutorial/response-status-code.md | advanced/additional-status-codes.md | advanced/response-change-status-code.md | advanced/response-change-status-code.md,True,0.667,False,,
+hybrid,25,True,How do I write automated tests for my FastAPI app?,"Use TestClient (needs httpx) with pytest: create a client from the app, call it like httpx and assert on the response.","To write automated tests for your FastAPI app, you can use the `TestClient` from FastAPI to simulate HTTP requests to your API. These tests can be written as synchronous or asynchronous functions. For asynchronous tests, you would use `async` functions and the `pytest` framework to ensure that your tests are run in an asynchronous environment. Here's a basic example of how you might set up an asynchronous test:
+
+```python
+from fastapi.testclient import TestClient
+import pytest
+
+@pytest.mark.asyncio
+async def test_get_item(client):
+    response = await client.get(""/items/1"")
+    assert response.status_code == 200
+    assert response.json() == {""item_id"": 1}
+```
+
+This example uses the `pytest` plugin `pytest-asyncio` to run the test asynchronously. You can install this plugin via pip if you haven't already:
+
+```bash
+pip install pytest-asyncio
+```
+
+Sources: [1], [2]",advanced/async-tests.md | deployment/versions.md | advanced/opentelemetry.md | tutorial/index.md,False,0.157,False,,
+hybrid,26,True,Do my test functions need to be async?,"No, test functions are normal def functions and calls to the client are normal calls without await.","Yes, your test functions need to be asynchronous if you want to call asynchronous functions in your tests. This is necessary because the `TestClient` does not support calling `async def` functions directly within asynchronous test functions. Instead, you should use the `TestClient` to send requests to your FastAPI application and then perform any necessary asynchronous operations outside of the test function, possibly using libraries like `pytest.mark.anyio` to mark your test functions as asynchronous.",advanced/async-tests.md | advanced/async-tests.md | advanced/async-tests.md | tutorial/testing.md,True,0.152,False,,
+hybrid,27,True,How do I serve static files such as images or CSS?,Import StaticFiles and mount a StaticFiles(directory=...) instance on a path such as /static.,"To serve static files such as images or CSS, you can use the `StaticFiles` class from `fastapi.staticfiles`. First, import the `StaticFiles` class:
+
+```python
+from fastapi.staticfiles import StaticFiles
+```
+
+Then, mount an instance of `StaticFiles` in a specific path, for example, `/static`:
+
+```python
+app.mount(""/static"", StaticFiles(directory=""path/to/static/files""), name=""static"")
+```
+
+Replace `""path/to/static/files""` with the actual directory containing your static files. This will make the static files available at URLs like `/static/<filename>`.",reference/staticfiles.md | how-to/custom-docs-ui-assets.md | how-to/custom-docs-ui-assets.md | advanced/templates.md,False,0.237,False,,
+hybrid,28,True,What does it mean to mount an application?,Adding a complete independent application at a specific path that handles all sub-paths; its docs and OpenAPI are not part of the main app.,"Mounting an application in FastAPI means to attach one application to another at a specific path. This allows for the creation of sub-applications within a main application, each accessible via a unique URL path. In the context provided, a sub-application named `subapi` is mounted under the path `/subapi` within the main application `app`.",advanced/sub-applications.md | advanced/sub-applications.md | advanced/behind-a-proxy.md | deployment/index.md,False,0.275,False,,
+hybrid,29,True,How do I write a function that runs for every request and response?,Use the @app.middleware('http') decorator on a function that receives request and call_next and returns the response.,"To write a function that runs for every request and response, you can create a middleware. Middleware functions are defined to work with every request before it is processed by any specific path operation and every response before it is returned. Here is an example of how to implement a middleware in FastAPI:
+
+```python
+from fastapi import FastAPI, Request, Response
+from fastapi.middleware.cors import CORSMiddleware
+
+app = FastAPI()
+
+# Define the middleware
+@app.middleware(""http"")
+async def add_process_time_header(request: Request, call_next):
+    start_time = time.time()
+    response = await call_next(request)
+    process_time = time.time() - start_time
+    response.headers[""X-Process-Time""] = str(process_time)
+    return response
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[""*""],
+    allow_credentials=True,
+    allow_methods=[""*""],
+    allow_headers=[""*""],
+)
+```
+
+This middleware adds a header named `X-Process-Time` to every response, which indicates the time taken to process the request. This is a simple example, but you can customize it to perform other actions such as logging, authentication, or handling background tasks.",tutorial/background-tasks.md | advanced/response-headers.md | tutorial/middleware.md | advanced/events.md,True,0.151,False,,
+hybrid,30,True,"If I add several middlewares, which one runs first?",The last middleware added is outermost and runs first on the request path and last on the response path.,"If you add several middlewares to your FastAPI application, the first middleware added will run first on both the request and response paths. This is due to the stack-like structure where the last middleware added is the outermost and thus runs last.",tutorial/middleware.md | advanced/middleware.md | advanced/middleware.md | advanced/middleware.md,True,0.516,False,,
+hybrid,31,True,How do I limit a query parameter to at most 50 characters?,"Use Annotated[str | None, Query(max_length=50)].","To limit a query parameter to at most 50 characters, you can use the `Query` function within an `Annotated` type and set the `max_length` argument to 50. Here's how you can modify the existing code snippet:
+
+```Python
+from fastapi import FastAPI, Query
+
+app = FastAPI()
+
+@app.get(""/items/"")
+async def read_items(q: Annotated[str | None, Query(max_length=50)] = None):
+    return {""q"": q}
+```
+
+This code ensures that the `q` parameter is validated to ensure its length does not exceed 50 characters. If the input exceeds this limit, FastAPI will raise a validation error.",tutorial/query-params-str-validations.md | tutorial/query-params-str-validations.md | tutorial/query-params-str-validations.md | tutorial/query-params.md,True,0.141,False,,
+hybrid,32,True,Can I validate a query parameter against a regular expression?,"Yes, with the pattern parameter of Query.","Yes, you can validate a query parameter against a regular expression by defining a regular expression pattern within the `pattern` argument of the `Query` annotation. This allows you to specify a regex pattern that the parameter's value must match.",tutorial/query-params-str-validations.md | tutorial/query-params-str-validations.md | tutorial/query-params-str-validations.md | tutorial/query-params-str-validations.md,True,0.255,False,,
+hybrid,33,True,How do I require a path parameter to be an integer greater than or equal to 1?,Use Path(ge=1) in Annotated.,"To require a path parameter to be an integer greater than or equal to 1, you use the `ge=1` constraint. Here is how you can define such a route:
+
+```python
+from fastapi import FastAPI, Path
+
+app = FastAPI()
+
+@app.get(""/items/{item_id}"")
+async def read_item(item_id: int = Path(gt=0, le=None, description=""The ID of the item to retrieve"", example=1)):
+    return {""item_id"": item_id}
+```
+
+In this example, `item_id` is constrained to be an integer greater than `0` and less than or equal to `None`. The `example=1` provides a default example value of `1` for the path parameter.",tutorial/path-params-numeric-validations.md | tutorial/path-params-numeric-validations.md | tutorial/path-params-numeric-validations.md | tutorial/path-params.md,True,0.095,False,,
+hybrid,34,True,How can I stop a user's password from appearing in the API response?,Declare an output model without the password field and use it as response_model (or return type) so FastAPI filters the data.,"By using password hashing, we can prevent the plaintext password from being returned in the API response. This involves storing a hashed version of the password instead of the actual password. When verifying a password, we compare the hashed version stored in the database with the hashed version of the password provided by the user during login. This ensures that even if the database is compromised, the actual passwords remain secure.",tutorial/response-model.md | tutorial/security/first-steps.md | how-to/conditional-openapi.md | tutorial/security/simple-oauth2.md,True,0.065,False,,
+hybrid,35,True,What happens if I declare both a return type annotation and response_model?,The response_model takes priority and is the one FastAPI uses.,"If both a return type annotation and `response_model` are declared, `response_model` will take priority and be used by FastAPI.",tutorial/response-model.md | tutorial/response-model.md | tutorial/response-model.md | tutorial/response-model.md,True,0.276,False,,
+hybrid,36,True,How do I share logic like common query parameters between several endpoints?,"Write a dependency function and declare it with Depends(), passing the function without calling it.","To share logic like common query parameters between several endpoints, you can define these parameters as query parameter models and combine them with individual query parameters or dependencies. This allows you to reuse the logic across different routes while maintaining the flexibility to customize each endpoint's specific parameters. You can achieve this by importing and using the defined query parameter models in your route definitions.",tutorial/path-params-numeric-validations.md | tutorial/query-param-models.md | tutorial/query-param-models.md | tutorial/body-multiple-params.md,False,0.074,False,,
+hybrid,37,True,How does FastAPI read headers like user-agent from a parameter named user_agent?,Header automatically converts underscores to hyphens; set convert_underscores=False to disable it.,"FastAPI reads headers like `user-agent` from a parameter named `user_agent` without requiring the capitalization typically associated with HTTP header keys. By default, FastAPI automatically converts underscores in the parameter name to hyphens, making it compatible with the hyphen-separated format of HTTP headers. This means that if you define a parameter named `user_agent`, FastAPI will correctly interpret this as the `User-Agent` header in the incoming request.",tutorial/header-params.md | tutorial/header-param-models.md | tutorial/query-param-models.md | advanced/behind-a-proxy.md,True,0.175,False,,
+hybrid,38,True,Should I define my endpoints with async def or def?,Use async def if your libraries support await; otherwise use normal def. You can mix both and FastAPI handles them correctly.,"You should define your endpoints with `async def` if they involve asynchronous operations such as I/O. However, if your endpoint is purely computational and you want to avoid the overhead of running it in a thread pool, you can use `def`. FastAPI will handle the execution appropriately based on the definition you choose.",tutorial/dependencies/index.md | async.md | async.md | async.md,True,0.267,False,,
+hybrid,39,True,What do I need to install to receive form fields?,"python-multipart, and then declare parameters with Form.",You need to install `python-multipart` to receive form fields.,tutorial/request-forms.md | tutorial/request-forms-and-files.md | tutorial/request-form-models.md | tutorial/request-form-models.md,True,0.333,False,,
+hybrid,40,True,What is the difference between PUT and PATCH for updating data?,"PUT replaces the existing data; PATCH updates partially, typically using exclude_unset in model_dump to apply only the sent fields.","The main difference between `PUT` and `PATCH` for updating data lies in their usage and intent:
+
+- `PUT` is used to replace the entire resource with the new representation sent in the request body. It is typically used when you want to ensure that the server has the latest complete state of the resource.
+  
+- `PATCH`, on the other hand, is used to apply partial updates to the resource. It allows sending only the data that needs to be changed, leaving the rest of the resource unchanged. This is useful when you want to make incremental changes to the resource without having to send the entire resource again.
+
+In the context of FastAPI, both methods are supported, but `PATCH` is recommended for partial updates due to its ability to handle only the necessary changes. However, `PUT` can also be used for partial updates if desired.",tutorial/body-updates.md | tutorial/body-updates.md | deployment/versions.md | tutorial/body-updates.md,True,0.148,False,,
+hybrid,41,True,What library does the docs example use for SQL databases?,"SQLModel, built on SQLAlchemy and Pydantic; table models use table=True.",SQLModel,tutorial/sql-databases.md | how-to/testing-database.md | tutorial/sql-databases.md | tutorial/sql-databases.md,True,0.167,False,,
+hybrid,42,True,What does tokenUrl mean in OAuth2PasswordBearer?,The URL the client uses to send the username and password to get a token; requests then send Authorization: Bearer <token>.,tokenUrl means the URL that the client (the frontend running in the user's browser) will use to send the username and password in order to get a token. It is a relative URL that points to the endpoint where the token will be issued.,tutorial/security/first-steps.md | tutorial/security/first-steps.md | reference/security/index.md | tutorial/security/simple-oauth2.md,True,0.455,False,,
+hybrid,43,True,Where is the OpenAPI schema served by default and how can I change it?,At /openapi.json; change it with the openapi_url parameter.,"By default, the OpenAPI schema is served at `/openapi.json`. You can change this location by configuring the `openapi_url` parameter. For instance, to serve it at `/api/v1/openapi.json`, you would modify your FastAPI application setup as shown in the code snippet from tutorial/metadata.md :: OpenAPI URL.",tutorial/metadata.md | tutorial/first-steps.md | how-to/extending-openapi.md | how-to/separate-openapi-schemas.md,True,0.276,False,,
+hybrid,44,True,How do I start the server from inside my Python file for debugging?,"Import uvicorn and call uvicorn.run(app, host=..., port=...) inside an if __name__ == '__main__' block.","To start the server from inside your Python file for debugging, you can use the `uvicorn.run(app, host=""0.0.0.0"", port=8000)` method. This allows you to run your FastAPI application directly within the debugger, which stops at your breakpoints. For instance, in Visual Studio Code, you can set up the debugger to run the server with the option `Python: Current File (Integrated Terminal)`. In PyCharm, you can select the file to debug (like `main.py`) to achieve the same effect.",tutorial/debugging.md | tutorial/debugging.md | index.md | deployment/manually.md,True,0.121,False,,
+hybrid,45,False,Who won the 2022 football World Cup?,NOT_IN_DOCS,I don't know.,tutorial/sql-databases.md | advanced/wsgi.md | index.md | tutorial/first-steps.md,,,True,,
+hybrid,46,False,What is a good recipe for sourdough bread?,NOT_IN_DOCS,I don't know.,tutorial/cookie-param-models.md | deployment/index.md | how-to/index.md | alternatives.md,,,True,,
+hybrid,47,False,How do I train a convolutional neural network on image data with PyTorch?,NOT_IN_DOCS,I don't know. The provided context does not contain information related to training a convolutional neural network with PyTorch.,advanced/dataclasses.md | deployment/docker.md | advanced/dataclasses.md | deployment/server-workers.md,,,True,,

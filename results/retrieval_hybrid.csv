@@ -1,0 +1,45 @@
+id,question,gold,rank,top1_source
+1,How do I make a query parameter optional?,tutorial/query-params.md,1,tutorial/query-params.md
+2,"If a route has skip=0 and limit=10 as defaults and I request /items/?skip=20, what values does my function get?",tutorial/query-params.md,1,tutorial/query-params.md
+3,What exactly is the query part of a URL?,tutorial/query-params.md,1,tutorial/query-params.md
+4,What response do I get if a path parameter declared as int receives the value foo?,tutorial/path-params.md,1,tutorial/path-params.md
+5,How do I declare the type of a path parameter?,tutorial/path-params.md,2,tutorial/path-params-numeric-validations.md
+6,How do I declare the JSON body that a client sends to my endpoint?,tutorial/body.md,1,tutorial/body.md
+7,Can a GET request carry a request body in FastAPI?,tutorial/body.md,1,tutorial/body.md
+8,Which HTTP methods should I use to send data to my API?,tutorial/body.md,3,tutorial/first-steps.md
+9,A client asks for an item that does not exist. How do I send back a not found response?,tutorial/handling-errors.md,1,tutorial/handling-errors.md
+10,Do I return or raise an HTTPException?,tutorial/handling-errors.md,1,tutorial/handling-errors.md
+11,Can the detail of an HTTPException be something other than a string?,tutorial/handling-errors.md,1,tutorial/handling-errors.md
+12,"How can I run a slow job, like sending an email, after the response has already been returned?",tutorial/background-tasks.md,1,tutorial/background-tasks.md
+13,What arguments does add_task receive?,tutorial/background-tasks.md,1,tutorial/background-tasks.md
+14,When should I use Celery instead of BackgroundTasks?,tutorial/background-tasks.md,1,tutorial/background-tasks.md
+15,How do I let a frontend on a different domain call my API?,tutorial/cors.md,2,tutorial/security/first-steps.md
+16,Why does allow_origins=['*'] not work when my frontend sends cookies or Authorization headers?,tutorial/cors.md,1,tutorial/cors.md
+17,What HTTP methods does CORSMiddleware allow by default?,tutorial/cors.md,1,tutorial/cors.md
+18,How long do browsers cache CORS responses by default?,tutorial/cors.md,1,tutorial/cors.md
+19,What counts as an origin in CORS?,tutorial/cors.md,1,tutorial/cors.md
+20,How do I accept a file upload from a client?,tutorial/request-files.md,1,tutorial/request-files.md
+21,Why would I use UploadFile instead of bytes for uploads?,tutorial/request-files.md,1,tutorial/request-files.md
+22,What attributes does UploadFile expose?,tutorial/request-files.md,1,tutorial/request-files.md
+23,How do I change the HTTP status code of a response?,tutorial/response-status-code.md,4,advanced/response-change-status-code.md
+24,Which status code should I return after creating a new record?,tutorial/response-status-code.md,1,tutorial/response-status-code.md
+25,How do I write automated tests for my FastAPI app?,tutorial/testing.md,6,advanced/async-tests.md
+26,Do my test functions need to be async?,tutorial/testing.md,4,advanced/async-tests.md
+27,How do I serve static files such as images or CSS?,tutorial/static-files.md,5,reference/staticfiles.md
+28,What does it mean to mount an application?,tutorial/static-files.md,9,advanced/sub-applications.md
+29,How do I write a function that runs for every request and response?,tutorial/middleware.md,3,tutorial/background-tasks.md
+30,"If I add several middlewares, which one runs first?",tutorial/middleware.md,1,tutorial/middleware.md
+31,How do I limit a query parameter to at most 50 characters?,tutorial/query-params-str-validations.md,1,tutorial/query-params-str-validations.md
+32,Can I validate a query parameter against a regular expression?,tutorial/query-params-str-validations.md,1,tutorial/query-params-str-validations.md
+33,How do I require a path parameter to be an integer greater than or equal to 1?,tutorial/path-params-numeric-validations.md,1,tutorial/path-params-numeric-validations.md
+34,How can I stop a user's password from appearing in the API response?,tutorial/response-model.md,1,tutorial/response-model.md
+35,What happens if I declare both a return type annotation and response_model?,tutorial/response-model.md,1,tutorial/response-model.md
+36,How do I share logic like common query parameters between several endpoints?,tutorial/dependencies/index.md,,tutorial/path-params-numeric-validations.md
+37,How does FastAPI read headers like user-agent from a parameter named user_agent?,tutorial/header-params.md,1,tutorial/header-params.md
+38,Should I define my endpoints with async def or def?,async.md,2,tutorial/dependencies/index.md
+39,What do I need to install to receive form fields?,tutorial/request-forms.md,1,tutorial/request-forms.md
+40,What is the difference between PUT and PATCH for updating data?,tutorial/body-updates.md,1,tutorial/body-updates.md
+41,What library does the docs example use for SQL databases?,tutorial/sql-databases.md,1,tutorial/sql-databases.md
+42,What does tokenUrl mean in OAuth2PasswordBearer?,tutorial/security/first-steps.md,1,tutorial/security/first-steps.md
+43,Where is the OpenAPI schema served by default and how can I change it?,tutorial/metadata.md,1,tutorial/metadata.md
+44,How do I start the server from inside my Python file for debugging?,tutorial/debugging.md,1,tutorial/debugging.md

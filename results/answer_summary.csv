@@ -1,0 +1,4 @@
+retriever,gold_page_in_top4,mean_token_F1,false_refusal_rate,correct_refusal_rate (unanswerable)
+bm25,0.818,0.246,0.0,1.0
+dense,0.977,0.243,0.023,1.0
+hybrid,0.909,0.267,0.023,1.0

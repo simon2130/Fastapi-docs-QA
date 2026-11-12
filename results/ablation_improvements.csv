@@ -1,0 +1,13 @@
+variant,retriever,n_chunks,hit@1,hit@3,hit@5,mrr
+"baseline (all pages, no title)",bm25,2090,0.568,0.75,0.841,0.682
+"baseline (all pages, no title)",dense,2090,0.773,0.909,0.955,0.847
+"baseline (all pages, no title)",hybrid,2090,0.591,0.886,0.932,0.75
++ exclude non-doc pages,bm25,1216,0.682,0.818,0.886,0.762
++ exclude non-doc pages,dense,1216,0.795,0.909,0.955,0.859
++ exclude non-doc pages,hybrid,1216,0.705,0.886,0.932,0.807
++ page title in chunks,bm25,2090,0.614,0.75,0.818,0.698
++ page title in chunks,dense,2090,0.727,0.955,0.977,0.835
++ page title in chunks,hybrid,2090,0.705,0.886,0.909,0.799
++ both (final system),bm25,1216,0.659,0.795,0.864,0.746
++ both (final system),dense,1216,0.75,0.955,0.977,0.847
++ both (final system),hybrid,1216,0.75,0.864,0.932,0.821
