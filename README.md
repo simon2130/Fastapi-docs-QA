@@ -66,7 +66,9 @@ python src/ingest.py        # builds data/chunks.jsonl
 python src/evaluate.py      # retrieval evaluation -> results/
 python app.py               # demo UI at http://127.0.0.1:7860
 ```
-A GPU is strongly recommended. On a CPU-only machine set `QA_MODEL=Qwen/Qwen2.5-1.5B-Instruct` for a smaller, faster model.
+**Reproducibility check.** Cloning this repository in a fresh Google Colab session and running `src/ingest.py` and `src/evaluate.py` reproduces the retrieval table of section 6.1 exactly (1,216 chunks; dense Hit@1/3/5 = 0.750 / 0.955 / 0.977, MRR 0.847). On a CPU-only runtime, embedding the chunks takes about 6 minutes.
+
+A GPU is strongly recommended for the generator. On a CPU-only machine set `QA_MODEL=Qwen/Qwen2.5-1.5B-Instruct` for a smaller, faster model.
 
 ## 5. Evaluation
 
@@ -74,7 +76,7 @@ A GPU is strongly recommended. On a CPU-only machine set `QA_MODEL=Qwen/Qwen2.5-
 
 **Retrieval metrics.** A retrieved chunk counts as correct if it comes from the gold page. *Hit@k* is the share of questions with a correct chunk in the top k; *MRR* is the mean reciprocal rank of the first correct chunk.
 
-**Answer metrics.** Token F1 against the reference answer (rough), the share of off-topic questions correctly refused, and a manual check of every answer for *correctness* and *faithfulness* (every claim supported by the retrieved sources).
+**Answer metrics.** Token F1 against the reference answer (rough), the share of off-topic questions correctly refused, and a check of every answer for *correctness* and *faithfulness* (every claim supported by the documentation), judged by an LLM (Claude) against the reference answers; see section 6.4.
 
 ## 6. Results
 
@@ -90,6 +92,8 @@ The transformer retriever finds the right page in the top 3 for 42 of 44 questio
 Combining it with BM25 did not help: the weaker keyword ranking dilutes the dense ranking.
 With only 44 questions, one question is worth about 2.3 percentage points, so differences of one to three questions (for example dense vs. hybrid) are suggestive, not conclusive.
 
+![Retrieval quality: BM25 vs dense vs hybrid](results/retrieval_comparison.png)
+
 ### 6.2 What improved retrieval
 
 | Variant | BM25 MRR | Dense MRR | Hybrid MRR |
@@ -99,7 +103,7 @@ With only 44 questions, one question is worth about 2.3 percentage points, so di
 | + page title in each chunk | 0.698 | 0.835 | 0.799 |
 | + both (final system) | 0.746 | 0.847 | 0.821 |
 
-- **Removing non-documentation pages mattered most for keyword search.** `release-notes.md` alone made up 821 of 2,089 chunks (39%) and is full of terms like "404" and "response_model", so it outranked the real documentation. BM25 MRR rose from 0.682 to 0.762. The dense retriever was barely affected (0.847 to 0.859).
+- **Removing non-documentation pages mattered most for keyword search.** `release-notes.md` alone made up about 820 of the roughly 2,090 chunks (39%) and is full of terms like "404" and "response_model", so it outranked the real documentation. BM25 MRR rose from 0.682 to 0.762. The dense retriever was barely affected (0.847 to 0.859).
 - **Adding the page title to chunks** gave mixed, small changes (it raised dense Hit@3/Hit@5 but lowered Hit@1), so we treat its effect as inconclusive. We kept it in the final system because the generator reads the top 4 chunks, so Hit@3 and Hit@5 matter more than Hit@1.
 
 ### 6.3 Chunk size (final system)
@@ -140,10 +144,10 @@ What the table shows:
 
 ## 7. Limitations
 
-- Retrieval is scored at page level: a retrieved chunk from the right page counts as correct even if it is the wrong section. Page-level Hit@k therefore overstates section-level accuracy, which is why we also check answers manually.
+- Retrieval is scored at page level: a retrieved chunk from the right page counts as correct even if it is the wrong section. Page-level Hit@k therefore overstates section-level accuracy, which is why we also judged the answers themselves (section 6.4).
 - 47 questions written by us from the same documentation are a small test set; results show clear trends, not statistically precise differences.
 - A 3B-parameter local model often misreads subtle passages and rarely follows the citation instruction reliably (section 6.5).
-- Answer correctness and faithfulness were judged by an LLM (Claude), not by humans, and faithfulness was checked against the documentation pages (the answer file stores page names, not chunk text); a team spot-check is still pending.
+- Answer correctness and faithfulness were judged by an LLM (Claude), not by humans, and faithfulness was checked against the documentation pages (the answer file stores page names, not chunk text); they have not been verified independently by humans.
 - Future work: the code examples are not in the retrieved text (error analysis 1). Replacing the `{* ... *}` markers by the real example files before chunking, and giving the generator the code while indexing only the prose, is the most promising next step.
 - One library's documentation (FastAPI); results may differ for other documentation styles.
 
