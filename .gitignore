@@ -1,0 +1,6 @@
+data/fastapi/
+data/emb_*.npy
+data/chunks.jsonl
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
