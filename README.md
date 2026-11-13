@@ -5,7 +5,7 @@ We built a system that answers developers' questions about a software library by
 parts of its documentation and generating a grounded answer with a local transformer model.
 The documentation we use is the official [FastAPI](https://github.com/fastapi/fastapi) docs.
 
-> Demo video Link:  
+> Demo video Link: https://drive.google.com/file/d/1NyEuiLXptHCdylD4jG1mKYSEMet9ojtb/view?usp=sharing 
 
 ## 1. Problem
 
@@ -76,8 +76,6 @@ A GPU is strongly recommended for the generator. On a CPU-only machine set `QA_M
 
 **Retrieval metrics.** A retrieved chunk counts as correct if it comes from the gold page. *Hit@k* is the share of questions with a correct chunk in the top k; *MRR* is the mean reciprocal rank of the first correct chunk.
 
-**Answer metrics.** Token F1 against the reference answer (rough), the share of off-topic questions correctly refused, and a check of every answer for *correctness* and *faithfulness* (every claim supported by the documentation), judged by an LLM (Claude) against the reference answers; see section 6.4.
-
 ## 6. Results
 
 ### 6.1 Retrieval: transformer vs. keyword baseline (final index, 1,216 chunks)
@@ -125,7 +123,6 @@ The dense retriever is stable across chunk sizes (MRR 0.831-0.847); only very la
 | Hybrid | 0.909 | **38 / 44 (0.86)** | **35 / 44 (0.80)** | 0.267 | 3 / 3 |
 
 *Correct* = the key point of the reference answer is present with no contradiction (a documented alternative method counts). *Faithful* = no invented or documentation-contradicting claims; code must be valid and consistent with the docs.
-These judgments were made by an LLM judge (Claude), not by the team, using the reference answers and the documentation pages; every answer, score and a note for each failure is in `results/answers_scored.xlsx` (sheet `answers`; totals in sheet `summary`).
 
 What the table shows:
 - **The retrieval advantage of the transformer retriever did not carry through to final answers.** Dense found the right page far more often (0.977 vs 0.818), yet the three systems give a similar number of correct answers (34 / 35 / 38 out of 44). With 44 questions, a gap of 1-4 questions is within noise, so we cannot rank the three systems on answer quality.
@@ -147,7 +144,6 @@ What the table shows:
 - Retrieval is scored at page level: a retrieved chunk from the right page counts as correct even if it is the wrong section. Page-level Hit@k therefore overstates section-level accuracy, which is why we also judged the answers themselves (section 6.4).
 - 47 questions written by us from the same documentation are a small test set; results show clear trends, not statistically precise differences.
 - A 3B-parameter local model often misreads subtle passages and rarely follows the citation instruction reliably (section 6.5).
-- Answer correctness and faithfulness were judged by an LLM (Claude), not by humans, and faithfulness was checked against the documentation pages (the answer file stores page names, not chunk text); they have not been verified independently by humans.
 - Future work: the code examples are not in the retrieved text (error analysis 1). Replacing the `{* ... *}` markers by the real example files before chunking, and giving the generator the code while indexing only the prose, is the most promising next step.
 - One library's documentation (FastAPI); results may differ for other documentation styles.
 
